@@ -537,7 +537,7 @@ public class MotorPH {
      * @return     the Pag-Ibig contribution, which is maximum 100
      * ===========================================================
      */
-    static double pagibigShare(double gross) {
+    static double pagibigShare(double base) {
         double c = (base <= 1500) ? base * 0.01 : base * 0.02;
         return Math.min(c, 100.00);
     }
