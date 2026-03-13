@@ -31,7 +31,7 @@ import java.util.Scanner;
  */
 public class MotorPH {
 
-    // Stores employee numbers, first names, last names, birthdays, base pay, and hourly rates.
+    // Employee information.
     static String[] empNum   = new String[34];
     static String[] lname    = new String[34];
     static String[] fname    = new String[34];
@@ -39,10 +39,10 @@ public class MotorPH {
     static String[] basePay  = new String[34];
     static String[] hrRate   = new String[34];
 
-    // Temporary buffer for CSV parsing
+    // Temporary buffer used when parsing CSV columns.
     static String[] cols     = new String[19];
 
-    // Daily Time Record  — Stores employee numbers, dates, time-in, time-out, parsed times, and computed daily hours.
+    // Daily Time Record (DTR) data.
     static String[]    dtrEmpNum  = new String[5168];
     static String[]    dtrDate    = new String[5168];
     static String[]    timeIn     = new String[5168];
@@ -52,17 +52,18 @@ public class MotorPH {
     static double[]    dailyHours = new double[5168];
 
     /**
-     * ====================================================================================================================
-     * This starts the MotorPH Payroll System.
-     * This method starts the whole system by loading the CSV files, computing daily hours, and checking login credentials.
+     * =========================================================================================================
+     * Starts the MotorPH Payroll System.
+     *
+     * Loads employee and DTR data from CSV files, computes daily work hours, and directs the user to either
+     * Employee or Payroll Staff Portal after login.
      *
      * @param args command-line arguments (not used)
      * @throws     fileNotFoundException if the employee or DTR CSV files are in the same directory as the code. 
-     * ====================================================================================================================
+     * =========================================================================================================
      */
     public static void main(String[] args) throws FileNotFoundException {
 
-        // Load employee and Daily Time Record data.
         loadEmployees("resources/motorphemployeedata.csv");
         loadDTR("resources/loginandout.csv");
         computeDailyHours();
@@ -74,7 +75,6 @@ public class MotorPH {
         System.out.print("Password: ");
         String pass = sc.nextLine();
 
-        // Determine role and calls the corresponding method; either the employee portal or the payroll payroll.
         if ("employee".equals(user) && "12345".equals(pass)) {
             runEmployeePortal(sc);
         } else if ("payroll_staff".equals(user) && "12345".equals(pass)) {
@@ -86,13 +86,14 @@ public class MotorPH {
     }
     
     /**
-     * ===================================================
-     * Displays the employee portal menu.
-     * For displaying employee details/exiting the system.
-     * No access to payroll processing.
+     * =======================================================================
+     * Displays the Employee Portal menu.
+     *
+     * Allows employees to view their basic profile details or exit the system.
+     * Payroll procesing is not avaiable in this portal.
      * 
      * @param sc Scanner object used to read user input.
-     * ===================================================
+     * =======================================================================
      */
     static void runEmployeePortal(Scanner sc) {
         while (true) {
@@ -127,12 +128,13 @@ public class MotorPH {
     }
 
     /**
-     * ===============================================================
-     * Displays the payroll portal menu and handles user interaction.
-     * Used for generating a payslip or exiting the system.
+     * ==============================================================
+     * Displays the Payroll Staff Portal menu.
+     *
+     * Allows payroll staff to generate a payslip or exit the system.
      * 
      * @param sc Scanner object used to read user input.
-     * ===============================================================
+     * ==============================================================
      */
     static void runPayrollPortal(Scanner sc) {
         while (true) {
@@ -154,12 +156,14 @@ public class MotorPH {
     }
 
     /**
-     * ==============================================================================================
-     * Displays the payslip processing menu and handles user input.
-     * Decides whether to rocess payroll for a single employee, all employees, or exiting the system.
+     * ======================================================================================
+     * Displays the payslip processing menu.
+     *
+     * Allows payroll staff to generate a payslip for a single employee or for all employees,
+     * or exit the system.
      * 
      * @param sc Scanner object used to read user input.
-     * ==============================================================================================
+     * ======================================================================================
      */
     static void runPayslipMenu(Scanner sc) {
         while (true) {
@@ -184,14 +188,16 @@ public class MotorPH {
     }
 
     /**
-     * =================================================================================================================
+     * =============================================================================
      * Processes payroll for one employee.
      * 
-     * It calculates the employee's gross salary, statutory deductions, and net salary after entering their employee ID.
-     * Then, it generates a detailed payroll summary for each cutoff from June to December based on what's selected.
+     * After entering an employee number, the system calculates the employee's
+     * gross salary, government deductions (SSS, PhilHealth, Pag-IBIG, and tax),
+     * and net salary. 
+     * A detailed payroll summary is generated for each cutoff from June to December
      * 
      * @param sc Scanner object used to read user input.
-     * =================================================================================================================
+     * =============================================================================
      */
     static void processSingleEmployee(Scanner sc) {
         System.out.print("Employee No.: ");
@@ -216,15 +222,15 @@ public class MotorPH {
             double hrs2   = getHours(num, "second", mo);
             double gross1 = hrs1 * rate;
             double gross2 = hrs2 * rate;
-            double combined   = gross1 + gross2;
+            double combined   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
             double sss        = sssTable(combined);
             double philhealth = philhealthShare(combined);
-            double pagibig    = pagibigShare(base); // Pagibig uses contracted salary per HDMF rules.
+            double pagibig    = pagibigShare(base); // Pag-IBIG uses contracted salary per HDMF rules.
             double taxable    = combined - sss - philhealth - pagibig;
             double whTax      = withholdingTax(taxable);
             double totalDed   = sss + philhealth + pagibig + whTax;
-            double net1 = gross1;
-            double net2 = gross2 - totalDed;
+            double net1 = gross1; // First cutoff: no government deductions
+            double net2 = gross2 - totalDed; // Second cutoff: government deductions applied
 
             String mn   = monthLabel(mo);
             int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
@@ -266,7 +272,7 @@ public class MotorPH {
     static void processAllEmployees(Scanner sc) {
         for (int mo = 6; mo <= 12; mo++) {
             String mn   = monthLabel(mo);
-            int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
+            int lastDay = YearMonth.of(2024, mo).lengthOfMonth(); 
 
             for (int i = 0; i < empNum.length; i++) {
                 if (empNum[i] == null) continue;
@@ -278,15 +284,15 @@ public class MotorPH {
                 double hrs2   = getHours(num, "second", mo);
                 double gross1 = hrs1 * rate;
                 double gross2 = hrs2 * rate;
-                double combined   = gross1 + gross2;
+                double combined   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
                 double sss        = sssTable(combined);
                 double philhealth = philhealthShare(combined);
-                double pagibig    = pagibigShare(base); // Pagibig uses contracted salary per HDMF rules.
+                double pagibig    = pagibigShare(base); // Pag-IBIG uses contracted salary per HDMF rules.
                 double taxable    = combined - sss - philhealth - pagibig;
                 double whTax      = withholdingTax(taxable);
                 double totalDed   = sss + philhealth + pagibig + whTax;
-                double net1 = gross1;
-                double net2 = gross2 - totalDed;
+                double net1 = gross1; // First cutoff: no government deductions
+                double net2 = gross2 - totalDed;  // Second cutoff: government deductions applied
 
                 System.out.println("\n========================================");
                 System.out.println("Employee #   : " + num);
@@ -313,7 +319,8 @@ public class MotorPH {
     /**
      * ====================================================================================
      * Loads the employee master list from a CSV file.
-     * It stores employee ID, last name, first name, birth date, base pay, and hourly rate.
+     *
+     * Stores employee ID, last name, first name, birth date, base pay, and hourly rate.
      * 
      * @param path the file pathname to the CSV file
      * @throws     FileNotFoundException if the CSV file is not found at the specified path
@@ -322,10 +329,10 @@ public class MotorPH {
     static void loadEmployees(String path) {
         try {
             Scanner f = new Scanner(new FileReader(path));
-            if (f.hasNextLine()) f.nextLine(); // skip header row
+            if (f.hasNextLine()) f.nextLine(); // skip the header row.
             int i = 0;
             while (f.hasNextLine()) {
-                // Uses a splitCSV method to slice off the commas.
+                // Split the CSV line into columns.
                 String[] c = splitCSV(f.nextLine());
                 empNum[i]  = c[0];
                 lname[i]   = c[1];
@@ -344,8 +351,9 @@ public class MotorPH {
 
     /**
      * ====================================================================================
-     * Loads the Daily Time Tecord (DTR) from a CSV file.
-     * It stores employee ID, date, time-in, and time-out.
+     * Loads DTR data from a CSV file.
+     *
+     * Stores employee ID, date, time-in, and time-out.
      * 
      * @param path the file pathname to the CSV file
      * @throws     FileNotFoundException if the CSV file is not found at the specified path
@@ -354,10 +362,10 @@ public class MotorPH {
     static void loadDTR(String path) {
         try {
             Scanner f = new Scanner(new FileReader(path));
-            if (f.hasNextLine()) f.nextLine();
+            if (f.hasNextLine()) f.nextLine(); // Skip the header row.
             int i = 0;
             while (f.hasNextLine()) {
-                // Uses a splitCSV method to slice off the commas.
+                // Split the CSV line into columns.
                 String[] c   = splitCSV(f.nextLine());
                 dtrEmpNum[i] = c[0];
                 dtrDate[i]   = c[3];
@@ -375,6 +383,7 @@ public class MotorPH {
     /**
      * ==================================================================================================
      * Computes daily working hours for all employees in advance.
+     *
      * Important note: This method exists to avoid recalculating hours every time a payslip is generated.
      * 
      * Rules:
@@ -396,7 +405,7 @@ public class MotorPH {
             parsedOut[i] = LocalTime.parse(timeOut[i].trim(), fmt);
 
             if (!parsedIn[i].isAfter(grace) && !parsedOut[i].isBefore(end)) {
-
+                // Full 8-hour workday.
                 dailyHours[i] = 8.0;
             } else {
 
@@ -407,17 +416,17 @@ public class MotorPH {
                     continue;
                 }
                 long mins = Duration.between(start, logout).toMinutes();
-                mins = (mins > 60) ? mins - 60 : 0;          
-                dailyHours[i] = Math.min(mins / 60.0, 8.0);
+                mins = (mins > 60) ? mins - 60 : 0; // Deduct 1-hour lunch if applicable.         
+                dailyHours[i] = Math.min(mins / 60.0, 8.0); // Cap daily hours at 8.
             }
         }
     }
 
     /**
      * ============================================================================================
-     * Returns total hours worked by an employee for a given month and cutoff.
-     * This method is called in both processSingleEmployee and 
-     * processAllEmployees to calculate gross pay.
+     * Calculates total hours worked by an employee for a specific month and cutoff period.
+     *
+     * This is used to compute gross pay.
      * 
      * @param num  the employee ID number as a String must match an entry in the "dtrEmpNum" array
      * @param half the cutoff period; must be either "first" (days 1-15) or "second" (days 16-end)
@@ -435,6 +444,7 @@ public class MotorPH {
                 int m   = Integer.parseInt(d[0]);
                 int day = Integer.parseInt(d[1]);
                 if (m != mo) continue;
+                // Add hours for the selected cutoff period .
                 if ("first".equals(half)  && day >= 1  && day <= 15) total += dailyHours[j];
                 if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours[j];
             } catch (Exception ignored) {}
@@ -443,17 +453,15 @@ public class MotorPH {
     }
 
    /**
-     * =====================================================================
+     * =======================================================================================
      * Calculates the employee's SSS contribution based on the gross salary.
      * 
      * The contribution is determined using fixed salary brackets. 
-     * Each bracket has a set contribution amount. 
-     * If the employee's salary is within a bracket, 
-     * the method returns the contribution assigned to that bracket.
+     * The method returns the corresponding SSS contribution for the employee's salary bracket.
      * 
      * @param gross the employee's gross month salary
      * @return      the corresponding SSS contribution
-     * =====================================================================
+     * =======================================================================================
      */
     static double sssTable(double gross) {
         if (gross < 3250)   return 135.00;
@@ -510,7 +518,7 @@ public class MotorPH {
      * Rules:
      * - The total premium is 3% of gross income, split 50/50 between employee and employer.
      * - If gross less than or equal 10,000, premium is 300.
-     * - If gross is greater than or eqqual 60,000, premium is capped at 1,800.
+     * - If gross is greater than or equal 60,000, premium is capped at 1,800.
      * 
      * @param taxable the employee's taxable income
      * @return        the corresponding withholding tax
@@ -526,7 +534,7 @@ public class MotorPH {
 
     /**
      * ===========================================================
-     * Calculates the employee's share of Pag-Ibig contributions.
+     * Calculates the employee’s Pag-IBIG contribution.
      * 
      * Rules:
      * - 1% of base if base is less than or equal 1,500.
@@ -543,15 +551,14 @@ public class MotorPH {
     }
 
     /**
-     * ===============================================================================================================================
+     * =================================================================================================
      * Calculates the employee's withholding tax based on taxable income.
      * 
-     * The tax is based on an employee's taxable income.
-     * Each salary bracket has a fixed base tax, plus a percentage of the portion of income that goes above the start of that bracket.
+     * Each salary bracket has a fixed base tax plus a percentage of income above the bracket threshold.
      * 
      * @param taxable the employee's taxable income
      * @return        the corresponding withholding tax
-     * ===============================================================================================================================
+     * =================================================================================================
      */
     static double withholdingTax(double taxable) {
         if (taxable <= 20832)  return 0;
