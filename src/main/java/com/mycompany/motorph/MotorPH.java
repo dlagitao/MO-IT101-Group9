@@ -12,6 +12,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /**
  * ==============================================================
@@ -32,22 +33,22 @@ import java.util.Scanner;
 public class MotorPH {
 
     // employee master list (34 employees in the company)
-    static String[] empNum   = new String[34];
-    static String[] lname    = new String[34];
-    static String[] fname    = new String[34];
-    static String[] bday     = new String[34];
-    static String[] basePay  = new String[34];
-    static String[] hrRate   = new String[34];
-    static String[] cols     = new String[19]; // reused buffer for CSV parsing
+    static ArrayList<String> empNum   = new ArrayList<>();
+    static ArrayList<String> lastName   = new ArrayList<>();
+    static ArrayList<String> firstName  = new ArrayList<>();
+    static ArrayList<String> bDay   = new ArrayList<>();
+    static ArrayList<String> basePay   = new ArrayList<>();
+    static ArrayList<String> hrRate   = new ArrayList<>();
+    static String[] cols = new String[19]; // placeholder array for temorary storage for the CSV split method's use
 
-    // DTR records — 5168 rows total in the loginandout file
-    static String[]    dtrEmpNum  = new String[5168];
-    static String[]    dtrDate    = new String[5168];
-    static String[]    timeIn     = new String[5168];
-    static String[]    timeOut    = new String[5168];
-    static LocalTime[] parsedIn   = new LocalTime[5168];
-    static LocalTime[] parsedOut  = new LocalTime[5168];
-    static double[]    dailyHours = new double[5168];
+    // DTR records — 5168 rows total in the loginandout.csv file
+    static ArrayList<String>    dtrEmpNum  = new ArrayList<>();
+    static ArrayList<String>    dtrDate  = new ArrayList<>();
+    static ArrayList<String>    timeIn  = new ArrayList<>();
+    static ArrayList<String>    timeOut  = new ArrayList<>();
+    static ArrayList<LocalTime>    parsedIn  = new ArrayList<>();
+    static ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
+    static ArrayList<Double>    dailyHours  = new ArrayList<>();
 
     /**
      * ====================================================================
@@ -72,15 +73,15 @@ public class MotorPH {
         
         while(!loggedIn) {
             System.out.print("Username: ");
-            String user = sc.nextLine();
+            String userName = sc.nextLine();
             System.out.print("Password: ");
-            String pass = sc.nextLine();
+            String passWord = sc.nextLine();
 
             // two roles: regular employee (view own info) and payroll staff (process payslips)
-            if ("employee".equals(user) && "12345".equals(pass)) {
+            if ("employee".equals(userName) && "12345".equals(passWord)) {
                 runEmployeePortal(sc);
                 loggedIn = true;
-            } else if ("payroll_staff".equals(user) && "12345".equals(pass)) {
+            } else if ("payroll_staff".equals(userName) && "12345".equals(passWord)) {
                 runPayrollPortal(sc);
                 loggedIn = true;
             } else {
@@ -104,24 +105,24 @@ public class MotorPH {
             System.out.println("\n---- Employee Portal ----");
             System.out.println("[1] Check Employee Profile");
             System.out.println("[2] Exit");
-            String pick = sc.nextLine().trim();
+            String choice = sc.nextLine().trim();
 
-            if ("1".equals(pick)) {
+            if ("1".equals(choice)) {
                 System.out.print("Enter your Employee No.: ");
                 String num = sc.nextLine().trim();
                 boolean hit = false;
-                for (int i = 0; i < empNum.length; i++) {
-                    if (num.equals(empNum[i])) {
-                        System.out.println("\nEmployee No. : " + empNum[i]);
-                        System.out.println("Name         : " + fname[i] + " " + lname[i]);
-                        System.out.println("Birthday     : " + bday[i]);
+                for (int i = 0; i < empNum.size(); i++) {
+                    if (num.equals(empNum.get(i))) {
+                        System.out.println("\nEmployee No. : " + empNum.get(i));
+                        System.out.println("Name         : " + firstName.get(i) + " " + lastName.get(i));
+                        System.out.println("Birthday     : " + bDay.get(i));
                         hit = true;
                         break;
                     }
                 }
                 if (!hit) System.out.println("Employee number does not exist. Please check the number and try again.");
 
-            } else if ("2".equals(pick)) {
+            } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 sc.close();
                 System.exit(0);
@@ -145,11 +146,11 @@ public class MotorPH {
             System.out.println("\n---- Payroll Portal ----");
             System.out.println("[1] Generate Payslip");
             System.out.println("[2] Exit");
-            String pick = sc.nextLine().trim();
+            String choice = sc.nextLine().trim();
 
-            if ("1".equals(pick)) {
+            if ("1".equals(choice)) {
                 runPayslipMenu(sc);
-            } else if ("2".equals(pick)) {
+            } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 sc.close();
                 System.exit(0);
@@ -174,13 +175,13 @@ public class MotorPH {
             System.out.println("[1] Single Employee");
             System.out.println("[2] All Employees");
             System.out.println("[3] Exit");
-            String pick = sc.nextLine().trim();
+            String choice = sc.nextLine().trim();
 
-            if ("1".equals(pick)) {
+            if ("1".equals(choice)) {
                 processSingleEmployee(sc);
-            } else if ("2".equals(pick)) {
+            } else if ("2".equals(choice)) {
                 processAllEmployees(sc);
-            } else if ("3".equals(pick)) {
+            } else if ("3".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 sc.close();
                 System.exit(0);
@@ -191,9 +192,9 @@ public class MotorPH {
     }
 
     static void processPayroll(int i, int mo) {
-        String num  = empNum[i];
-        double rate = Double.parseDouble(hrRate[i]);
-        double base = Double.parseDouble(basePay[i]);
+        String num  = empNum.get(i);
+        double rate = Double.parseDouble(hrRate.get(i));
+        double base = Double.parseDouble(basePay.get(i));
         
         double hrs1   = getHours(num, "first",  mo);
         double hrs2   = getHours(num, "second", mo);
@@ -214,12 +215,12 @@ public class MotorPH {
         double net2 = gross2 - totalDed;
         
         // Maximum hours for second cutoff; 88 if month has 31 days, else 80.
-        String mn   = monthLabel(mo);
+        String monLabel   = monthLabel(mo);
         int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
         double cap2 = (lastDay == 31) ? 88.0 : 80.0;
         
         System.out.println("\n========================================");
-        System.out.println("  Cutoff: " + mn + " 1 to " + mn + " 15");
+        System.out.println("  Cutoff: " + monLabel + " 1 to " + monLabel + " 15");
         System.out.println("  (8 hrs/day x 5 days/wk x 2 wks = 80 hrs max)");
         System.out.println("========================================");
         System.out.println("Total Hours Worked : " + hrs1 + " / 80.00 hrs");
@@ -227,7 +228,7 @@ public class MotorPH {
         System.out.println("Net Salary         : Php" + net1);
 
         System.out.println("\n========================================");
-        System.out.println("  Cutoff: " + mn + " 16 to " + mn + " " + lastDay);
+        System.out.println("  Cutoff: " + monLabel + " 16 to " + monLabel + " " + lastDay);
         System.out.println("  (8 hrs/day x 5 days/wk x 2 wks = " + cap2 + " hrs max)");
         System.out.println("========================================");
         System.out.println("Total Hours Worked : " + hrs2 + " / " + cap2 + " hrs");
@@ -259,20 +260,20 @@ public class MotorPH {
     static void processSingleEmployee(Scanner sc) {
         System.out.print("Employee No.: ");
         String num = sc.nextLine().trim();
-
-        int idx = -1;
-        for (int i = 0; i < empNum.length; i++) {
-            if (num.equals(empNum[i])) { idx = i; break; }
+        
+        int i = empNum.indexOf(num);
+        
+        if (i == -1) { 
+            System.out.println("Employee number does not exist."); return; 
         }
-        if (idx == -1) { System.out.println("Employee number does not exist."); return; }
         
         System.out.println("\n----Employee Details----");
-        System.out.println("Employee #   : " + empNum[idx]);
-        System.out.println("Employee Name: " + fname[idx] + " " + lname[idx]);
-        System.out.println("Birthday     : " + bday[idx]);
+        System.out.println("Employee #   : " + empNum.get(i));
+        System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
+        System.out.println("Birthday     : " + bDay.get(i));
                 
         for (int mo = 6; mo <= 12; mo++) {
-            processPayroll(idx, mo);
+            processPayroll(i, mo);
         }
     }
     
@@ -293,12 +294,12 @@ public class MotorPH {
         // Loops from June to December
         for (int mo = 6; mo <= 12; mo++) {
             // Loop through all employees.
-            for (int i = 0; i < empNum.length; i++) {
-                if (empNum[i] == null) continue;
+            for (int i = 0; i < empNum.size(); i++) {
+                if (empNum.get(i) == null) continue;
                 System.out.println("\n----Employee Details----");
-                System.out.println("Employee #   : " + empNum[i]);
-                System.out.println("Employee Name: " + fname[i] + " " + lname[i]);
-                System.out.println("Birthday     : " + bday[i]);
+                System.out.println("Employee #   : " + empNum.get(i));
+                System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
+                System.out.println("Birthday     : " + bDay.get(i));
                 processPayroll(i, mo);
             }
         }
@@ -323,16 +324,14 @@ public class MotorPH {
         try {
             Scanner f = new Scanner(new FileReader(path));
             if (f.hasNextLine()) f.nextLine(); // skip header row
-            int i = 0;
             while (f.hasNextLine()) {
                 String[] c = splitCSV(f.nextLine());
-                empNum[i]  = c[0];
-                lname[i]   = c[1];
-                fname[i]   = c[2];
-                bday[i]    = c[3];
-                basePay[i] = c[13].replace(",", "");
-                hrRate[i]  = c[18].replace(",", "");
-                i++;
+                empNum.add(c[0]);
+                lastName.add(c[1]);
+                firstName.add(c[2]);
+                bDay.add(c[3]);
+                basePay.add(c[13].replace(",", ""));
+                hrRate.add(c[18].replace(",", ""));
             }
             f.close();
         } catch (FileNotFoundException e) {
@@ -359,14 +358,15 @@ public class MotorPH {
         try {
             Scanner f = new Scanner(new FileReader(path));
             if (f.hasNextLine()) f.nextLine();
-            int i = 0;
             while (f.hasNextLine()) {
                 String[] c   = splitCSV(f.nextLine());
-                dtrEmpNum[i] = c[0];
-                dtrDate[i]   = c[3];
-                timeIn[i]    = c[4];
-                timeOut[i]   = c[5];
-                i++;
+                dtrEmpNum.add(c[0]);
+                dtrDate.add(c[3]);
+                timeIn.add(c[4]);
+                timeOut.add(c[5]);
+                dailyHours.add(0.0); 
+                parsedIn.add(null);  
+                parsedOut.add(null);
             }
             f.close();
         } catch (FileNotFoundException e) {
@@ -394,22 +394,23 @@ public class MotorPH {
         LocalTime grace = LocalTime.of(8, 10); // 8:10 is the cutoff — arriving by 8:10 is still "on time"
         LocalTime end   = LocalTime.of(17, 0);  // no overtime counted past 5PM
 
-        for (int i = 0; i < 5168; i++) {
-            if (timeIn[i] == null || timeOut[i] == null) continue;
+        for (int i = 0; i < timeIn.size(); i++) {
+            if (timeIn.get(i) == null || timeOut.get(i) == null) continue;
 
-            parsedIn[i]  = LocalTime.parse(timeIn[i].trim(),  format);
-            parsedOut[i] = LocalTime.parse(timeOut[i].trim(), format);
-            LocalTime login  = parsedIn[i];
+            parsedIn.set(i, LocalTime.parse(timeIn.get(i).trim(),  format));
+            parsedOut.set(i, LocalTime.parse(timeOut.get(i).trim(), format));
+            LocalTime login;
 
-            if (!parsedIn[i].isAfter(grace)) {
+            if (!parsedIn.get(i).isAfter(grace)) {
                 login = start;
             } else {
-                // late — cap logout at 5PM, deduct 1 hr lunch break
-                LocalTime logout = parsedOut[i].isAfter(end) ? end : parsedOut[i];
-                long mins = Duration.between(login, logout).toMinutes();
-                mins = (mins > 60) ? mins - 60 : 0;
-                dailyHours[i] = Math.min(mins / 60.0, 8.0);
+                login = parsedIn.get(i);
             }
+                // late — cap logout at 5PM, deduct 1 hr lunch break
+            LocalTime logout = parsedOut.get(i).isAfter(end) ? end : parsedOut.get(i);
+            long mins = Duration.between(login, logout).toMinutes();
+            mins = (mins > 60) ? mins - 60 : 0;
+            dailyHours.set(i, Math.min(mins / 60.0, 8.0));
         }
     }
 
@@ -428,16 +429,16 @@ public class MotorPH {
      */
     static double getHours(String num, String half, int mo) {
         double total = 0;
-        for (int j = 0; j < 5168; j++) {
-            if (!num.equals(dtrEmpNum[j])) continue;
-            if (dtrDate[j] == null) continue;
+        for (int j = 0; j < timeIn.size(); j++) {
+            if (!num.equals(dtrEmpNum.get(j))) continue;
+            if (dtrDate.get(j) == null) continue;
             try {
-                String[] d = dtrDate[j].trim().split("/");
+                String[] d = dtrDate.get(j).trim().split("/");
                 int m   = Integer.parseInt(d[0]);
                 int day = Integer.parseInt(d[1]);
                 if (m != mo) continue;
-                if ("first".equals(half)  && day >= 1  && day <= 15) total += dailyHours[j];
-                if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours[j];
+                if ("first".equals(half)  && day >= 1  && day <= 15) total += dailyHours.get(j);
+                if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(j);
             } catch (Exception ignored) {}
         }
         // cap to max working hours for the period
@@ -587,14 +588,6 @@ public class MotorPH {
     /**
      * =================================================================================================================================
      * Method used to display months in generated payroll.
-     * 
-     * 
-     * Example: Employee's gross is 5000.
-     * 1. They fall into the 1st bracket (300 premium).
-     * 2. The premium is then multiplied by 0.50 to get the employee's share.
-     * 
-     * If the base salary is 1500 or less, only 0.01 of the base is taken.
-     * If greater than 1500, 0.02 of the base is taken.
      * 
      * @param m The month number (6-12).
      * 
