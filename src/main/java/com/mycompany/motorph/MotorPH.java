@@ -298,9 +298,8 @@ public class MotorPH {
      */
     static void processAllEmployees(Scanner sc) {
         // Loops from June to December.
-        for (int mo = 6; mo <= 12; mo++) {
-            for (int i = 0; i < employeeNumber.size(); i++) {
-                if (employeeNumber.get(i) == null) continue;
+        for (int i = 0; i < employeeNumber.size(); i++) {
+            for (int mo = 6; mo <= 12; mo++){
                 System.out.println("\n----Employee Details----");
                 System.out.println("Employee #   : " + employeeNumber.get(i));
                 System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
@@ -629,3 +628,4 @@ public class MotorPH {
         return cols;
     }
 }
+
