@@ -420,7 +420,7 @@ public class MotorPH {
     }
 
     /**
-     *==============================================================
+     * ==============================================================
      * Calculates total hours worked by an employee for a specific 
      * month and cutoff period.
      *
