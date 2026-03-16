@@ -395,7 +395,6 @@ public class MotorPH {
      */
     static void computeDailyHours() {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("H:mm", Locale.ENGLISH);
-        LocalTime start = LocalTime.of(8,0);
         LocalTime grace = LocalTime.of(8, 10); 
         LocalTime end   = LocalTime.of(17, 0);
 
@@ -529,8 +528,8 @@ public class MotorPH {
      * - If the gross is greater than or equal to 60,000, premium is capped at 1,800.
      * 
      * @param gross The employee's gross monthly salary.
-     * @return      The employee's share of the PhilHealth premium,
-     *              which is 50%.
+     * @return      The employee's share of the PhilHealth premium
+     *              (50% of the total premium).
      * 
      *==============================================================
      */
