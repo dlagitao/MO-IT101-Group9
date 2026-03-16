@@ -61,8 +61,8 @@ public class MotorPH {
      * Payroll Staff Portal after logging in.
      *
      * @param args command-line arguments (not used).
-     * @throws     fileNotFoundException if the employee or DTR 
-     * CSV files are not found in the specified directory.
+     * @throws     FileNotFoundException if the employee or DTR 
+     *             CSV files are not found in the specified directory.
      *
      * ==============================================================
      */
@@ -95,8 +95,8 @@ public class MotorPH {
     
      /**
      * ==============================================================
-     * Displays the Employee Portal, allowing user to either view 
-     * the employee's details or exit the system.
+     * Displays the Employee Portal, allowing the user to either view 
+     * employee details or exit the system.
      * No access to payroll processing.
      * 
      * @param sc Scanner object used to read user input.
@@ -201,8 +201,7 @@ public class MotorPH {
      * hourly rate, and base pay, and the results are displayed per 
      * cutoff period from June to December.
      *
-     * @param i Index variable from the for loops
-     * that loop through the CSV file.
+     * @param i  Index of the employee in the employee data list.
      * @param mo Month variable for the display label.
      *
      * ==============================================================
@@ -258,7 +257,7 @@ public class MotorPH {
         
     /**
      * ==============================================================
-     * Process payroll for one employee.
+     * Process payroll for a single employee.
      * 
      * The method first requests for the Employee ID.
      * It then displays the employee ID, full name,
@@ -292,9 +291,9 @@ public class MotorPH {
      * ==============================================================
      * Process payroll for all employees (bulk).
      * 
-     * Similar to the singleEmployee method, but does it for all employees.
+     * Similar to processSingleEmployee(), but processes payroll for all employees.
      *
-     * @param sc Scanner object used to read user input
+     * @param sc Scanner object used to read user input.
      * 
      * ==============================================================
      */
@@ -320,15 +319,15 @@ public class MotorPH {
      * base pay, and hourly rate.
      * 
      * @param path The file pathname to the CSV file
-     * @throws FileNotFoundException if the CSV file is 
-     * not found at the specified path
+     * @throws     FileNotFoundException if the CSV file is 
+     *             not found at the specified path.
      * 
      * ==============================================================
      */
     static void loadEmployees(String path) {
         try {
             Scanner f = new Scanner(new FileReader(path));
-            if (f.hasNextLine()) f.nextLine(); // skip the header row.
+            if (f.hasNextLine()) f.nextLine(); // Skip the header row.
             while (f.hasNextLine()) {
                 // Split the CSV line into columns.
                 String[] c = splitCSV(f.nextLine());
@@ -353,8 +352,8 @@ public class MotorPH {
      * Stores employee ID, date, time-in, and time-out.
      * 
      * @param path The file pathname to the CSV file
-     * @throws FileNotFoundException if the CSV file is 
-     * not found at the specified path
+     * @throws     FileNotFoundException if the CSV file is 
+     *             not found at the specified path.
      * 
      * ==============================================================
      */
@@ -428,8 +427,8 @@ public class MotorPH {
      *
      * This is used to compute gross pay.
      *
-     * @param num  The employee ID number as a String must 
-     *             match dtrEmployeeNumber array).
+     * @param num  The employee ID number as a String that must match 
+     *             an entry in the dtrEmployeeNumber array.
      * @param half The cutoff period; must be either "first" (days 1-15) 
      *             or "second" (days 16-end).
      * @param mo   The month of the year as an integer.
@@ -453,7 +452,7 @@ public class MotorPH {
                 if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(j);
             } catch (Exception ignored) {}
         }
-        // cap to max working hours for the period.
+        // Cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
         return Math.min(total, maxDays * 8.0);
@@ -467,8 +466,8 @@ public class MotorPH {
      * The method returns the corresponding SSS contribution 
      * for the employee's salary bracket.
      * 
-     * @param gross The employee's gross month salary.
-     * @return The corresponding SSS contribution.
+     * @param gross The employee's gross monthly salary.
+     * @return      The corresponding SSS contribution.
      * 
      * ==============================================================
      */
@@ -527,11 +526,11 @@ public class MotorPH {
      * Rules:
      * - The total premium is 3% of gross income, and is split 50/50 
      * between employee and employer.
-     * - If the gross is less than or equal 10,000, premium is 300.
-     * - If the gross is greater than or equal 60,000, premium is capped at 1,800.
+     * - If the gross is less than or equal to 10,000, premium is 300.
+     * - If the gross is greater than or equal to 60,000, premium is capped at 1,800.
      * 
-     * @param taxable The employee's taxable income.
-     * @return The corresponding withholding tax.
+     * @param gross The employee's gross monthly salary.
+     * @return      The employee's share of the PhilHealth premium.
      * 
      *==============================================================
      */
@@ -548,12 +547,12 @@ public class MotorPH {
      * Calculates the employee's share of Pag-Ibig contributions.
      * 
      * Rules:
-     * - Contribution is 1% of the base pay if the base pay is less than or equal 1,500.
+     * - Contribution is 1% of the base pay if the base pay is less than or equal to 1,500.
      * - Contribution is 2% of the base pay if the base pay is greater than 1,500.
      * - The contribution is capped at 100.
      * 
-     * @param base the employee's base salary
-     * @return     the Pag-Ibig contribution, which is maximum 100
+     * @param base The employee's base salary.
+     * @return     The Pag-IBIG contribution, which is maximum 100.
      * ==============================================================
      */
     static double pagibigShare(double base) {
@@ -569,7 +568,7 @@ public class MotorPH {
      * percentage of income above the bracket threshold.
      * 
      * @param taxable The employee's taxable income.
-     * @return The corresponding withholding tax.
+     * @return        The corresponding withholding tax.
      * 
      * ==============================================================
      */
@@ -586,8 +585,8 @@ public class MotorPH {
      * ==============================================================
      * Converts a month number to its corresponding month name.
      * 
-     * @param m the month number (6-12)
-     * @return  month name as a string, or "???" if invalid
+     * @param m The month number (6-12)
+     * @return  Month name as a string, or "???" if invalid.
      * 
      * ==============================================================
      */
@@ -608,7 +607,7 @@ public class MotorPH {
      * Leading and trailing spaces are trimmed from each field.
      * 
      * @param line The CSV line to split.
-     * @return An array of strings representing each column in the CSV line.
+     * @return     An array of strings representing each column in the CSV line.
      * 
      * ==============================================================
      */
