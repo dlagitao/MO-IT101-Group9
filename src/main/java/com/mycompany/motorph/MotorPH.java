@@ -59,7 +59,7 @@ public class MotorPH {
      * and then directing the user to either the Employee or Payroll Staff Portal after logging in.
      *
      * @param args command-line arguments (not used).
-     * @throws     fileNotFoundException if the employee or DTR CSV files are in the same directory as the code. 
+     * @throws     fileNotFoundException if the employee or DTR CSV files are not found in the specified directory.
      *
      * ==============================================================================================================================
      */
