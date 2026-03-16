@@ -198,8 +198,19 @@ public class MotorPH {
     }
 
     /**
-    * NULL
-    */
+     * ==============================================================
+     * Combines all calculation methods for payroll processing,
+     * including hours worked, late deductions, sss,
+     * PhilHealth, Pag-IBIG, withholding tax, and overall net pay.
+     * Calculations are run based on employee ID, hourly rate, and base pay.
+     * Calculations are then displayed properly bi-monthly from Jun to Dec.
+     *
+     * @param i Index variable from the for loops
+     * that loop through the CSV file.
+     * @param mo Month variable for the display label.
+     *
+     * ==============================================================
+     */
     static void processPayroll(int i, int mo) {
         String num  = empNum.get(i);
         double rate = Double.parseDouble(hrRate.get(i));
