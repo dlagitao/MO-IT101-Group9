@@ -262,7 +262,7 @@ public class MotorPH {
         
     /**
      * ==================================================
-     * Process payroll for all employees.
+     * Process payroll for one employees.
      * 
      * The method first requests for the Employee ID.
      * It then displays the employee ID, full name,
@@ -296,7 +296,8 @@ public class MotorPH {
      * =================================================
      * Process payroll for all employees (bulk).
      * 
-     * NULL
+     * It takes the employee ID, name, and birthday similar
+     * to the singleEmployee method but does it for all employees.
      *
      * @param sc Scanner object used to read user input
      * 
