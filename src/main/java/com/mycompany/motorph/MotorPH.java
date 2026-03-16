@@ -396,8 +396,9 @@ public class MotorPH {
             parsedOut.set(i, LocalTime.parse(timeOut.get(i).trim(), format));
             LocalTime login;
 
-            if (!parsedIn.get(i).isAfter(grace)) {
-                login = start;
+           if (!parsedIn.get(i).isAfter(grace)) {
+                dailyHours.set(i, 8.0);
+                continue;
             } else {
                 login = parsedIn.get(i);
             }
