@@ -33,18 +33,18 @@ import java.util.ArrayList;
 public class MotorPH {
 
     // Employee information.
-    static ArrayList<String> empNum   = new ArrayList<>();
+    static ArrayList<String> employeeNumber   = new ArrayList<>();
     static ArrayList<String> lastName   = new ArrayList<>();
     static ArrayList<String> firstName  = new ArrayList<>();
-    static ArrayList<String> bDay   = new ArrayList<>();
+    static ArrayList<String> birthDate   = new ArrayList<>();
     static ArrayList<String> basePay   = new ArrayList<>();
-    static ArrayList<String> hrRate   = new ArrayList<>();
+    static ArrayList<String> hourlyRate   = new ArrayList<>();
     
     // Temporary buffer used when parsing CSV columns.
     static String[] cols = new String[19]; 
 
     // Daily Time Record (DTR) data.
-    static ArrayList<String>    dtrEmpNum  = new ArrayList<>();
+    static ArrayList<String>    dtrEmployeeNumber  = new ArrayList<>();
     static ArrayList<String>    dtrDate  = new ArrayList<>();
     static ArrayList<String>    timeIn  = new ArrayList<>();
     static ArrayList<String>    timeOut  = new ArrayList<>();
@@ -109,11 +109,11 @@ public class MotorPH {
                 System.out.print("Enter your Employee No.: ");
                 String num = sc.nextLine().trim();
                 boolean hit = false;
-                for (int i = 0; i < empNum.size(); i++) {
-                    if (num.equals(empNum.get(i))) {
-                        System.out.println("\nEmployee No. : " + empNum.get(i));
+                for (int i = 0; i < employeeNumber.size(); i++) {
+                    if (num.equals(employeeNumber.get(i))) {
+                        System.out.println("\nEmployee No. : " + employeeNumber.get(i));
                         System.out.println("Name         : " + firstName.get(i) + " " + lastName.get(i));
-                        System.out.println("Birthday     : " + bDay.get(i));
+                        System.out.println("Birthday     : " + birthDate.get(i));
                         hit = true;
                         break;
                     }
@@ -200,8 +200,8 @@ public class MotorPH {
      * =======================================================================
      */
     static void processPayroll(int i, int mo) {
-        String num  = empNum.get(i);
-        double rate = Double.parseDouble(hrRate.get(i));
+        String num  = employeeNumber.get(i);
+        double rate = Double.parseDouble(hourlyRate.get(i));
         double base = Double.parseDouble(basePay.get(i));
         
         double hrs1   = getHours(num, "first",  mo);
@@ -217,8 +217,8 @@ public class MotorPH {
         double whTax      = withholdingTax(taxable);
         double totalDed   = sss + philhealth + pagibig + whTax;
 
-        double net1 = gross1; // First cutoff: no government deductions
-        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied
+        double net1 = gross1; // First cutoff: no government deductions.
+        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied.
         
         String monLabel   = monthLabel(mo);
         int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
@@ -264,16 +264,16 @@ public class MotorPH {
         System.out.print("Employee No.: ");
         String num = sc.nextLine().trim();
         
-        int i = empNum.indexOf(num);
+        int i = employeeNumber.indexOf(num);
         
         if (i == -1) { 
             System.out.println("Employee number does not exist."); return; 
         }
         
         System.out.println("\n----Employee Details----");
-        System.out.println("Employee #   : " + empNum.get(i));
+        System.out.println("Employee #   : " + employeeNumber.get(i));
         System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-        System.out.println("Birthday     : " + bDay.get(i));
+        System.out.println("Birthday     : " + birthDate.get(i));
                 
         for (int mo = 6; mo <= 12; mo++) {
             processPayroll(i, mo);
@@ -291,14 +291,14 @@ public class MotorPH {
      * ===================================================================
      */
     static void processAllEmployees(Scanner sc) {
-        // Loops from June to December
+        // Loops from June to December.
         for (int mo = 6; mo <= 12; mo++) {
-            for (int i = 0; i < empNum.size(); i++) {
-                if (empNum.get(i) == null) continue;
+            for (int i = 0; i < employeeNumber.size(); i++) {
+                if (employeeNumber.get(i) == null) continue;
                 System.out.println("\n----Employee Details----");
-                System.out.println("Employee #   : " + empNum.get(i));
+                System.out.println("Employee #   : " + employeeNumber.get(i));
                 System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-                System.out.println("Birthday     : " + bDay.get(i));
+                System.out.println("Birthday     : " + birthDate.get(i));
                 processPayroll(i, mo);
             }
         }
@@ -322,12 +322,12 @@ public class MotorPH {
             while (f.hasNextLine()) {
                 // Split the CSV line into columns.
                 String[] c = splitCSV(f.nextLine());
-                empNum.add(c[0]);
+                employeeNumber.add(c[0]);
                 lastName.add(c[1]);
                 firstName.add(c[2]);
-                bDay.add(c[3]);
+                birthDate.add(c[3]);
                 basePay.add(c[13].replace(",", ""));
-                hrRate.add(c[18].replace(",", ""));
+                hourlyRate.add(c[18].replace(",", ""));
             }
             f.close();
         } catch (FileNotFoundException e) {
@@ -354,7 +354,7 @@ public class MotorPH {
             while (f.hasNextLine()) {
                 // Split the CSV line into columns.
                 String[] c   = splitCSV(f.nextLine());
-                dtrEmpNum.add(c[0]);
+                dtremployeeNumber.add(c[0]);
                 dtrDate.add(c[3]);
                 timeIn.add(c[4]);
                 timeOut.add(c[5]);
@@ -414,7 +414,7 @@ public class MotorPH {
      *
      * This is used to compute gross pay.
      *
-     * @param num  The employee ID number as a String must match dtrEmpNum array).
+     * @param num  The employee ID number as a String must match dtremployeeNumber array).
      * @param half The cutoff period; must be either "first" (days 1-15) or "second" (days 16-end).
      * @param mo   The month of the year as an integer.
      * @return     The total hours worked, capped at the maximum standard hours for the period.
@@ -424,7 +424,7 @@ public class MotorPH {
     static double getHours(String num, String half, int mo) {
         double total = 0;
         for (int j = 0; j < timeIn.size(); j++) {
-            if (!num.equals(dtrEmpNum.get(j))) continue;
+            if (!num.equals(dtremployeeNumber.get(j))) continue;
             if (dtrDate.get(j) == null) continue;
             try {
                 String[] d = dtrDate.get(j).trim().split("/");
@@ -436,7 +436,7 @@ public class MotorPH {
                 if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(j);
             } catch (Exception ignored) {}
         }
-        // cap to max working hours for the period
+        // cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
         return Math.min(total, maxDays * 8.0);
