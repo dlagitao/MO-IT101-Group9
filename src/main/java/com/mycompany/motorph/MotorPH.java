@@ -193,8 +193,8 @@ public class MotorPH {
      * Calculations are performed based on employee ID, hourly rate, and base pay, 
      * and the results are displayed per cutoff period from June to December.
      *
-     * @param i Index variable from the for loops
-     * that loop through the CSV file.
+     * @param i Index variable from the for loops that loop through the CSV file.
+     * 
      * @param mo Month variable for the display label.
      *
      * =======================================================================
