@@ -291,7 +291,6 @@ public class MotorPH {
     static void processAllEmployees(Scanner sc) {
         // Loops from June to December
         for (int mo = 6; mo <= 12; mo++) {
-            // Loop through all employees.
             for (int i = 0; i < empNum.size(); i++) {
                 if (empNum.get(i) == null) continue;
                 System.out.println("\n----Employee Details----");
