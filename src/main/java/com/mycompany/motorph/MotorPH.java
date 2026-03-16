@@ -55,10 +55,8 @@ public class MotorPH {
     
     /**
      * ==============================================================================================================================
-     * Starts the MotorPH Payroll System.
-     *
-     * Loads employee and DTR data from CSV files, computes daily work hours, and directs the user to either
-     * Employee or Payroll Staff Portal after login.
+     * Starts the MotorPH Payroll System by loading employee and DTR data from CSV files, computing daily work hours, 
+     * and then directing the user to either the Employee or Payroll Staff Portal after logging in.
      *
      * @param args command-line arguments (not used).
      * @throws     fileNotFoundException if the employee or DTR CSV files are in the same directory as the code. 
@@ -92,16 +90,13 @@ public class MotorPH {
         }
     }
     
-    /**
-     * ========================================================================
-     * Displays the Employee Portal menu.
-     *
-     * Allows employees to view their basic profile details or exit the system.
-     * Payroll procesing is not avaiable in this portal.
+     /**
+     * =====================================================================================================
+     * Displays the Employee Portal, allowing user to either view the employee's details or exit the system.
+     * No access to payroll processing.
      * 
      * @param sc Scanner object used to read user input.
-     * 
-     * ========================================================================
+     * =====================================================================================================
      */
     static void runEmployeePortal(Scanner sc) {
         while (true) {
@@ -136,14 +131,11 @@ public class MotorPH {
     }
 
     /**
-     * ==============================================================
-     * Displays the Payroll Staff Portal menu.
-     *
-     * Allows payroll staff to generate a payslip or exit the system.
+     * ======================================================================================================
+     * Displays the Payroll Portal where the user can choose to either generate a payslip or exit the system.
      * 
      * @param sc Scanner object used to read user input.
-     *
-     * ==============================================================
+     * ======================================================================================================
      */
     static void runPayrollPortal(Scanner sc) {
         while (true) {
@@ -165,15 +157,11 @@ public class MotorPH {
     }
 
     /**
-     * ======================================================================================
-     * Displays the payslip processing menu.
-     *
-     * Allows payroll staff to generate a payslip for a single employee or for all employees,
-     * or exit the system.
+     * =================================================================================================================================================
+     * Displays the payslip processing menu where the user can choose to either process payroll for a single employee, all employees, or exit the system.
      * 
      * @param sc Scanner object used to read user input.
-     * 
-     * ======================================================================================
+     * =================================================================================================================================================
      */
     static void runPayslipMenu(Scanner sc) {
         while (true) {
@@ -200,10 +188,10 @@ public class MotorPH {
     /**
      * ==============================================================
      * Combines all calculation methods for payroll processing,
-     * including hours worked, late deductions, sss,
+     * including hours worked, late deductions, SSS,
      * PhilHealth, Pag-IBIG, withholding tax, and overall net pay.
-     * Calculations are run based on employee ID, hourly rate, and base pay.
-     * Calculations are then displayed properly bi-monthly from Jun to Dec.
+     * Calculations are run based on employee ID, hourly rate, and base pay,
+     * and are then displayed properly bi-monthly from Jun to Dec.
      *
      * @param i Index variable from the for loops
      * that loop through the CSV file.
