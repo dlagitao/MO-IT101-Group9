@@ -264,7 +264,9 @@ public class MotorPH {
      * ==================================================
      * Process payroll for all employees.
      * 
-     * NULL
+     * The method first requests for the Employee ID.
+     * It then displays the employee ID, full name,
+     * and birthdate before calling the processPayroll method.
      * 
      * @param sc Scanner object used to read user input.
      * 
