@@ -354,7 +354,7 @@ public class MotorPH {
             while (f.hasNextLine()) {
                 // Split the CSV line into columns.
                 String[] c   = splitCSV(f.nextLine());
-                dtremployeeNumber.add(c[0]);
+                dtrEmployeeNumber.add(c[0]);
                 dtrDate.add(c[3]);
                 timeIn.add(c[4]);
                 timeOut.add(c[5]);
@@ -414,7 +414,7 @@ public class MotorPH {
      *
      * This is used to compute gross pay.
      *
-     * @param num  The employee ID number as a String must match dtremployeeNumber array).
+     * @param num  The employee ID number as a String must match dtrEmployeeNumber array).
      * @param half The cutoff period; must be either "first" (days 1-15) or "second" (days 16-end).
      * @param mo   The month of the year as an integer.
      * @return     The total hours worked, capped at the maximum standard hours for the period.
@@ -424,7 +424,7 @@ public class MotorPH {
     static double getHours(String num, String half, int mo) {
         double total = 0;
         for (int j = 0; j < timeIn.size(); j++) {
-            if (!num.equals(dtremployeeNumber.get(j))) continue;
+            if (!num.equals(dtrEmployeeNumber.get(j))) continue;
             if (dtrDate.get(j) == null) continue;
             try {
                 String[] d = dtrDate.get(j).trim().split("/");
