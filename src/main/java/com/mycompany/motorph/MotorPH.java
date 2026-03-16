@@ -201,12 +201,12 @@ public class MotorPH {
         double gross1 = hrs1 * rate;
         double gross2 = hrs2 * rate;
 
-        // gov't contributions computed on combined gross for the month
-        double combined   = gross1 + gross2;
-        double sss        = sssTable(combined);
-        double philhealth = philhealthShare(combined);
+        // gov't contributions computed on combinedGross gross for the month
+        double combinedGross   = gross1 + gross2;
+        double sss        = sssTable(combinedGross);
+        double philhealth = philhealthShare(combinedGross);
         double pagibig    = pagibigShare(base); // pagibig uses contracted salary per HDMF rules
-        double taxable    = combined - sss - philhealth - pagibig;
+        double taxable    = combinedGross - sss - philhealth - pagibig;
         double whTax      = withholdingTax(taxable);
         double totalDed   = sss + philhealth + pagibig + whTax;
 
