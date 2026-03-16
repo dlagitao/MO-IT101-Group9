@@ -50,19 +50,17 @@ public class MotorPH {
     static ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
     static ArrayList<Double>    dailyHours  = new ArrayList<>();
 
+    
     /**
-     * ====================================================================
-     * This starts the MotorPH Payroll System.
-     * This method starts the whole system by loading the CSV files,
-     * computing daily hours, and checking login credentials.
-     * @param args command-line arguments (not used)
-     * @throws FileNotFoundException if the employee or DTR CSV 
-     * files are in the same directory as the code. 
-     * 
-     * ====================================================================
+     * ==============================================================================================================================
+     * This method starts the MotorPH Payroll System by loading the CSV files, computing daily hours, and checking login credentials.
+     *
+     * @param args command-line arguments (not used).
+     * @throws     fileNotFoundException if the employee or DTR CSV files are in the same directory as the code. 
+     * ==============================================================================================================================
      */
     public static void main(String[] args) throws FileNotFoundException {
-
+// Loads employee and Daily Time Record data.
         loadEmployees("resources/motorphemployeedata.csv");
         loadDTR("resources/loginandout.csv");
         computeDailyHours();
@@ -77,7 +75,7 @@ public class MotorPH {
             System.out.print("Password: ");
             String passWord = sc.nextLine();
 
-            // two roles: regular employee (view own info) and payroll staff (process payslips)
+            // Determines role and calls the corresponding method which is either the Employee Portal or the Payroll Portal.
             if ("employee".equals(userName) && "12345".equals(passWord)) {
                 runEmployeePortal(sc);
                 loggedIn = true;
