@@ -430,7 +430,7 @@ public class MotorPH {
      *             an entry in the dtrEmployeeNumber array.
      * @param half The cutoff period; must be either "first" (days 1-15) 
      *             or "second" (days 16-end).
-     * @param mo   The month of the year as an integer.
+     * @param mo   June to December, as an integer (6-12).
      * @return     The total hours worked, capped at the maximum 
      *             standard hours for the period.
      * 
@@ -529,7 +529,8 @@ public class MotorPH {
      * - If the gross is greater than or equal to 60,000, premium is capped at 1,800.
      * 
      * @param gross The employee's gross monthly salary.
-     * @return      The employee's share of the PhilHealth premium.
+     * @return      The employee's share of the PhilHealth premium,
+     *              which is 50%.
      * 
      *==============================================================
      */
@@ -551,7 +552,7 @@ public class MotorPH {
      * - The contribution is capped at 100.
      * 
      * @param base The employee's base salary.
-     * @return     The Pag-IBIG contribution, which is maximum 100.
+     * @return     The Pag-IBIG contribution, capped at 100.
      * ==============================================================
      */
     static double pagibigShare(double base) {
