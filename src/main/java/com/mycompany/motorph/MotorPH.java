@@ -157,11 +157,11 @@ public class MotorPH {
     }
 
     /**
-     * =================================================================================================================================================
+     * ==================================================================================================================================================
      * Displays the payslip processing menu where the user can choose to either process payroll for a single employee, all employees, or exit the system.
      * 
      * @param sc Scanner object used to read user input.
-     * =================================================================================================================================================
+     * ==================================================================================================================================================
      */
     static void runPayslipMenu(Scanner sc) {
         while (true) {
@@ -186,7 +186,7 @@ public class MotorPH {
     }
 
     /**
-     * ==============================================================
+     * =======================================================================
      * Combines all calculation methods for payroll processing,
      * including hours worked, late deductions, SSS,
      * PhilHealth, Pag-IBIG, withholding tax, and overall net pay.
@@ -197,7 +197,7 @@ public class MotorPH {
      * that loop through the CSV file.
      * @param mo Month variable for the display label.
      *
-     * ==============================================================
+     * =======================================================================
      */
     static void processPayroll(int i, int mo) {
         String num  = empNum.get(i);
@@ -249,16 +249,16 @@ public class MotorPH {
     }
         
     /**
-     * ==================================================
-     * Process payroll for one employees.
+     * =======================================================
+     * Process payroll for one employee.
      * 
      * The method first requests for the Employee ID.
      * It then displays the employee ID, full name,
-     * and birthdate before calling the processPayroll method.
+     * and birthday before calling the processPayroll method.
      * 
      * @param sc Scanner object used to read user input.
      * 
-     * ==================================================
+     * =======================================================
      */
     static void processSingleEmployee(Scanner sc) {
         System.out.print("Employee No.: ");
@@ -281,15 +281,14 @@ public class MotorPH {
     }
     
     /**
-     * =================================================
+     * ===================================================================
      * Process payroll for all employees (bulk).
      * 
-     * It takes the employee ID, name, and birthday similar
-     * to the singleEmployee method but does it for all employees.
+     * Similar to the singleEmployee method, but does it for all employees.
      *
      * @param sc Scanner object used to read user input
      * 
-     * =================================================
+     * ===================================================================
      */
     static void processAllEmployees(Scanner sc) {
         // Loops from June to December
@@ -309,7 +308,7 @@ public class MotorPH {
      * =================================================================================
      * Loads the employee master list from a CSV file.
      * 
-     * Stores employee ID, last name, first name, birth date, base pay, and hourly rate.
+     * Stores employee ID, last name, first name, birthday, base pay, and hourly rate.
      * 
      * @param path The file pathname to the CSV file
      * @throws FileNotFoundException if the CSV file is not found at the specified path
@@ -380,7 +379,7 @@ public class MotorPH {
      * - Arrival by 8:10 AM is considered on time. After that, the employee is late.
      * - Working hours are capped at 8 hours per day.
      * - No overtime is counted for hours worked past 5:00 PM.
-     * - A 1 hour lunch break is deducted in the logic.
+     * - A 1-hour lunch break is deducted in the logic.
      *
      * ===================================================================================================
      */
@@ -504,18 +503,18 @@ public class MotorPH {
     }
 
     /**
-     * =====================================================================================
+     * =============================================================================================
      * Calculates the employee's share of the PhilHealth premium.
      * 
      * Rules:
-     * - The total premium is 3% of gross income, split 50/50 between employee and employer.
-     * - If gross less than or equal 10,000, premium is 300.
-     * - If gross is greater than or equal 60,000, premium is capped at 1,800.
+     * - The total premium is 3% of gross income, and is split 50/50 between employee and employer.
+     * - If the gross less than or equal 10,000, premium is 300.
+     * - If the gross is greater than or equal 60,000, premium is capped at 1,800.
      * 
      * @param taxable The employee's taxable income.
      * @return The corresponding withholding tax.
      * 
-     * =====================================================================================
+     * =============================================================================================
      */
     static double philhealthShare(double gross) {
         double premium;
@@ -525,19 +524,18 @@ public class MotorPH {
         return premium * 0.50;
     }
 
-    /**
-     * =================================================================================================================================
-     * Calculates the employee’s Pag-IBIG contribution.
+     /**
+     * =================================================================================
+     * Calculates the employee's share of Pag-Ibig contributions.
      * 
      * Rules:
-     * - 1% of base if base is less than or equal 1,500.
-     * - 2% of base if base is greater than 1,500.
+     * - Contribution is 1% of the base pay if the base pay is less than or equal 1,500.
+     * - Contribution is 2% of the base pay if the base pay is greater than 1,500.
      * - The contribution is capped at 100.
      * 
-     * @param base The employee's base salary.
-     * @return The Pag-Ibig contribution, which is maximum 100.
-     * 
-     * =================================================================================================================================
+     * @param base the employee's base salary
+     * @return     the Pag-Ibig contribution, which is maximum 100
+     * =================================================================================
      */
     static double pagibigShare(double base) {
         double c = (base <= 1500) ? base * 0.01 : base * 0.02;
