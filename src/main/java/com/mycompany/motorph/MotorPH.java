@@ -16,8 +16,7 @@ import java.util.ArrayList;
 
 /**
  * ==============================================================
- * Contains most of the primary variables for use in the system.
- * Also contains all methods needed to run the program.
+ * Contains all primary variables and data for use in the system.
  * Handles CSV data reading, employee details presentation,
  * calculation of working hours, and payroll calculation
  * from June to December 2024.
