@@ -36,7 +36,7 @@ public class MotorPH {
     static ArrayList<String> employeeNumber   = new ArrayList<>();
     static ArrayList<String> lastName   = new ArrayList<>();
     static ArrayList<String> firstName  = new ArrayList<>();
-    static ArrayList<String> birthDate   = new ArrayList<>();
+    static ArrayList<String> birthDay   = new ArrayList<>();
     static ArrayList<String> basePay   = new ArrayList<>();
     static ArrayList<String> hourlyRate   = new ArrayList<>();
     
@@ -113,7 +113,7 @@ public class MotorPH {
                     if (num.equals(employeeNumber.get(i))) {
                         System.out.println("\nEmployee No. : " + employeeNumber.get(i));
                         System.out.println("Name         : " + firstName.get(i) + " " + lastName.get(i));
-                        System.out.println("Birthday     : " + birthDate.get(i));
+                        System.out.println("Birthday     : " + birthDay.get(i));
                         hit = true;
                         break;
                     }
@@ -273,7 +273,7 @@ public class MotorPH {
         System.out.println("\n----Employee Details----");
         System.out.println("Employee #   : " + employeeNumber.get(i));
         System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-        System.out.println("Birthday     : " + birthDate.get(i));
+        System.out.println("Birthday     : " + birthDay.get(i));
                 
         for (int mo = 6; mo <= 12; mo++) {
             processPayroll(i, mo);
@@ -298,7 +298,7 @@ public class MotorPH {
                 System.out.println("\n----Employee Details----");
                 System.out.println("Employee #   : " + employeeNumber.get(i));
                 System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-                System.out.println("Birthday     : " + birthDate.get(i));
+                System.out.println("Birthday     : " + birthDay.get(i));
                 processPayroll(i, mo);
             }
         }
@@ -325,7 +325,7 @@ public class MotorPH {
                 employeeNumber.add(c[0]);
                 lastName.add(c[1]);
                 firstName.add(c[2]);
-                birthDate.add(c[3]);
+                birthDay.add(c[3]);
                 basePay.add(c[13].replace(",", ""));
                 hourlyRate.add(c[18].replace(",", ""));
             }
