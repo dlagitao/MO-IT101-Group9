@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * Contains most of the primary variables for use in the system.
  * Also contains all methods needed to run the program.
  * Handles CSV data reading, employee details presentation,
- * estimation of working hours, and payroll calculation
+ * calculation of working hours, and payroll calculation
  * from June to December 2024.
  * 
  * @author Cail Maven Lusares
@@ -190,8 +190,8 @@ public class MotorPH {
      * Combines all calculation methods for payroll processing,
      * including hours worked, late deductions, SSS,
      * PhilHealth, Pag-IBIG, withholding tax, and overall net pay.
-     * Calculations are run based on employee ID, hourly rate, and base pay,
-     * and are then displayed properly bi-monthly from Jun to Dec.
+     * Calculations are performed based on employee ID, hourly rate, and base pay, 
+     * and the results are displayed per cutoff period from June to December.
      *
      * @param i Index variable from the for loops
      * that loop through the CSV file.
@@ -370,18 +370,18 @@ public class MotorPH {
     }
 
     /**
-     * ===================================================================================================
+     * ==================================================================================================================
      * Computes daily working hours for all employees in advance.
      *
-     * Important note: This method exists to avoid recalculating hours every time a payslip is generated.
+     * Important note: This method pre-computes daily hours to avoid recalculating them whenever a payslip is generated.
      * 
      * Rules:
-     * - Arrival by 8:10 AM is considered on time. After that, the employee is late.
+     * - Arrival at or before 8:10 AM is considered on time.
      * - Working hours are capped at 8 hours per day.
      * - No overtime is counted for hours worked past 5:00 PM.
      * - A 1-hour lunch break is deducted in the logic.
      *
-     * ===================================================================================================
+     * ==================================================================================================================
      */
     static void computeDailyHours() {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("H:mm", Locale.ENGLISH);
@@ -509,7 +509,7 @@ public class MotorPH {
      * 
      * Rules:
      * - The total premium is 3% of gross income, and is split 50/50 between employee and employer.
-     * - If the gross less than or equal 10,000, premium is 300.
+     * - If the gross is less than or equal 10,000, premium is 300.
      * - If the gross is greater than or equal 60,000, premium is capped at 1,800.
      * 
      * @param taxable The employee's taxable income.
@@ -585,7 +585,7 @@ public class MotorPH {
      * =====================================================================
      * Splits a CSV line into an array of strings.
      * 
-     * Handles quoted fields, commas inside quotes are ignored.
+     * Handles quoted fields; commas inside quotes are ignored.
      * Leading and trailing spaces are trimmed from each field.
      * 
      * @param line The CSV line to split.
