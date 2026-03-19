@@ -114,9 +114,7 @@ public class MotorPH {
                 boolean hit = false;
                 for (int i = 0; i < employeeNumber.size(); i++) {
                     if (num.equals(employeeNumber.get(i))) {
-                        System.out.println("\nEmployee No. : " + employeeNumber.get(i));
-                        System.out.println("Name         : " + firstName.get(i) + " " + lastName.get(i));
-                        System.out.println("Birthday     : " + birthDay.get(i));
+                        displayEmployeeDetails(i);
                         hit = true;
                         break;
                     }
@@ -197,62 +195,109 @@ public class MotorPH {
      * including hours worked, late deductions, SSS,
      * PhilHealth, Pag-IBIG, withholding tax, and overall net pay.
      * Calculations are performed based on employee ID, 
-     * hourly rate, and base pay, and the results are displayed per 
-     * cutoff period from June to December.
+     * hourly rate, and base pay, and the results are passed to the 
+     * displayPayrollCalculations method for displaying.
      *
      * @param i  Index of the employee in the employee data list.
-     * @param mo Month variable for the display label.
+     * @param month Month variable for the display label.
      *
      * ==============================================================
      */
-    static void processPayroll(int i, int mo) {
+   static void processPayroll(int i, int month) {
         String num  = employeeNumber.get(i);
         double rate = Double.parseDouble(hourlyRate.get(i));
         double base = Double.parseDouble(basePay.get(i));
+        double hrs1   = getHours(num, "first",  month);
+        double hrs2   = getHours(num, "second", month);
         
-        double hrs1   = getHours(num, "first",  mo);
-        double hrs2   = getHours(num, "second", mo);
         double gross1 = hrs1 * rate;
         double gross2 = hrs2 * rate;
-
         double combinedGross   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
+        
         double sss        = sssTable(combinedGross);
-        double philhealth = philhealthShare(combinedGross);
-        double pagibig    = pagibigShare(base); // Pag-IBIG uses contracted salary per HDMF rules.
-        double taxable    = combinedGross - sss - philhealth - pagibig;
+        double philHealth = philhealthShare(combinedGross);
+        double pagIbig    = pagibigShare(base); // Pag-IBIG uses contracted salary per HDMF rules.
+        double taxable    = combinedGross - sss - philHealth - pagIbig; // The result of this is the employee's income that can still be taxed, after applying all gov't deductions (except tax) to gross income.
         double whTax      = withholdingTax(taxable);
-        double totalDed   = sss + philhealth + pagibig + whTax;
+        double totalDed   = sss + philHealth + pagIbig + whTax;
 
         double net1 = gross1; // First cutoff: no government deductions.
         double net2 = gross2 - totalDed; // Second cutoff: government deductions applied.
-        
-        String monLabel   = monthLabel(mo);
-        int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
-        double cap2 = (lastDay == 31) ? 88.0 : 80.0;
-        
+
+        String monthLabel   = monthLabel(month);
+        int lastDay = YearMonth.of(2024, month).lengthOfMonth();
+        double cap = (lastDay == 31) ? 88.0 : 80.0; // 31-month days are given an 11-day work week (11 X 8 = 88 hours); otherwise, the cap is kept within a 10-day work week (10 X 8 = 80).
+
+        displayPayrollCalculations(monthLabel, lastDay, hrs1, gross1, net1, hrs2, cap, gross2, sss, philHealth, pagIbig, whTax, totalDed, net2);
+    }
+    /**
+     * ==============================================================
+     * Method used to display the calculation results of processPayroll.
+     * 
+     * @param monthLabel The corresponding month of each calculation
+     * @param lastDay The last day of the corresponding month.
+     * @param hrs1 Hours worked of the first cutoff.
+     * @param gross1 Gross salary of the first cutoff.
+     * @param net1 Net salary of the first cutoff, which will be lower 
+     *             if the employee had late days.
+     * @param hrs2 Hours worked of the second cutoff.
+     * @param cap Maximum working hours for the given month.
+     * @param gross2 Gross salary of the second cutoff.
+     * 
+     * For more information on these gov't deductions,
+     * refer to their methods later in the code.
+     * @param sss SSS deduction for the employee.
+     * @param philHealth PhilHealth deduction for the employee.
+     * @param pagIbig Pag-IBIG deduction for the employee.
+     * @param whTax Employee's withholding tax.
+     * @param totalDed Total gov't deductions.
+     * @param net2 Net salary of the second cutoff.
+     * ==============================================================
+     */
+    static void displayPayrollCalculations(String monthLabel, int lastDay, double hrs1, double gross1, double net1, double hrs2, double cap, double gross2, double sss, double philHealth, double pagIbig, double whTax, double totalDed, double net2) {
         System.out.println("\n========================================");
-        System.out.println("  Cutoff: " + monLabel + " 1 to " + monLabel + " 15");
+        System.out.println("  Cutoff: " + monthLabel + " 1 to " + monthLabel + " 15");
         System.out.println("  (8 hrs/day x 5 days/wk x 2 wks = 80 hrs max)");
         System.out.println("========================================");
         System.out.println("Total Hours Worked : " + hrs1 + " / 80.00 hrs");
         System.out.println("Gross Salary       : Php" +  gross1);
         System.out.println("Net Salary         : Php" + net1);
-
         System.out.println("\n========================================");
-        System.out.println("  Cutoff: " + monLabel + " 16 to " + monLabel + " " + lastDay);
-        System.out.println("  (8 hrs/day x 5 days/wk x 2 wks = " + cap2 + " hrs max)");
+        System.out.println("  Cutoff: " + monthLabel + " 16 to " + monthLabel + " " + lastDay);
+        System.out.println("  (8 hrs/day x 5 days/wk x 2 wks = " + cap + " hrs max)");
         System.out.println("========================================");
-        System.out.println("Total Hours Worked : " + hrs2 + " / " + cap2 + " hrs");
+        System.out.println("Total Hours Worked : " + hrs2 + " / " + cap + " hrs");
         System.out.println("Gross Salary       : Php" + gross2);
         System.out.println("\n--- Statutory Deductions ---");
         System.out.println("  SSS             : Php" + sss);
-        System.out.println("  PhilHealth      : Php" + philhealth);
-        System.out.println("  Pag-IBIG        : Php" + pagibig);
+        System.out.println("  PhilHealth      : Php" + philHealth);
+        System.out.println("  Pag-IBIG        : Php" + pagIbig);
         System.out.println("  Tax             : Php" + whTax);
         System.out.println("  Subtotal        : Php" + totalDed);
         System.out.println("Net Salary        : Php" + net2);
         System.out.println("========================================");
     }
+
+    /**
+     * ==============================================================
+     * This method displays employee details.
+     * 
+     * Taking the index variable i as input,
+     * it then displays the ID, full name, 
+     * and birthday within the index variable i.
+     * 
+     * @param i Index variable that describes the row in which
+     * the correct information can be found.
+     * 
+     * ==============================================================
+     */
+    static void displayEmployeeDetails(int i) {
+        System.out.println("\n----Employee Details----");
+        System.out.println("Employee #   : " + employeeNumber.get(i));
+        System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
+        System.out.println("Birthday     : " + birthDay.get(i));
+    }
+   
         
     /**
      * ==============================================================
@@ -268,21 +313,18 @@ public class MotorPH {
      */
     static void processSingleEmployee(Scanner sc) {
         System.out.print("Employee No.: ");
-        String num = sc.nextLine().trim();
+        String number = sc.nextLine().trim();
         
-        int i = employeeNumber.indexOf(num);
+        int i = employeeNumber.indexOf(number);
         
         if (i == -1) { 
             System.out.println("Employee number does not exist."); return; 
         }
         
-        System.out.println("\n----Employee Details----");
-        System.out.println("Employee #   : " + employeeNumber.get(i));
-        System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-        System.out.println("Birthday     : " + birthDay.get(i));
+        displayEmployeeDetails(i);
                 
-        for (int mo = 6; mo <= 12; mo++) {
-            processPayroll(i, mo);
+        for (int month = 6; month <= 12; month++) {
+            processPayroll(i, month);
         }
     }
     
@@ -299,12 +341,9 @@ public class MotorPH {
     static void processAllEmployees(Scanner sc) {
         // Loops from June to December.
         for (int i = 0; i < employeeNumber.size(); i++) {
-            for (int mo = 6; mo <= 12; mo++){
-                System.out.println("\n----Employee Details----");
-                System.out.println("Employee #   : " + employeeNumber.get(i));
-                System.out.println("Employee Name: " + firstName.get(i) + " " + lastName.get(i));
-                System.out.println("Birthday     : " + birthDay.get(i));
-                processPayroll(i, mo);
+            for (int month = 6; month <= 12; month++) {
+                displayEmployeeDetails(i);
+                processPayroll(i, month);
             }
         }
     }
@@ -324,19 +363,19 @@ public class MotorPH {
      */
     static void loadEmployees(String path) {
         try {
-            Scanner f = new Scanner(new FileReader(path));
-            if (f.hasNextLine()) f.nextLine(); // Skip the header row.
-            while (f.hasNextLine()) {
+            Scanner reader = new Scanner(new FileReader(path));
+            if (reader.hasNextLine()) reader.nextLine(); // Skip the header row.
+            while (reader.hasNextLine()) {
                 // Split the CSV line into columns.
-                String[] c = splitCSV(f.nextLine());
-                employeeNumber.add(c[0]);
-                lastName.add(c[1]);
-                firstName.add(c[2]);
-                birthDay.add(c[3]);
-                basePay.add(c[13].replace(",", ""));
-                hourlyRate.add(c[18].replace(",", ""));
+                String[] column = splitCSV(reader.nextLine());
+                employeeNumber.add(column[0]);
+                lastName.add(column[1]);
+                firstName.add(column[2]);
+                birthDay.add(column[3]);
+                basePay.add(column[13].replace(",", ""));
+                hourlyRate.add(column[18].replace(",", ""));
             }
-            f.close();
+            reader.close();
         } catch (FileNotFoundException e) {
             System.out.println("Could not open employee file: " + e.getMessage());
             System.exit(1);
@@ -357,20 +396,20 @@ public class MotorPH {
      */
     static void loadDTR(String path) {
         try {
-            Scanner f = new Scanner(new FileReader(path));
-            if (f.hasNextLine()) f.nextLine(); // Skip the header row.
-            while (f.hasNextLine()) {
+            Scanner reader = new Scanner(new FileReader(path));
+            if (reader.hasNextLine()) reader.nextLine(); // Skip the header row.
+            while (reader.hasNextLine()) {
                 // Split the CSV line into columns.
-                String[] c   = splitCSV(f.nextLine());
-                dtrEmployeeNumber.add(c[0]);
-                dtrDate.add(c[3]);
-                timeIn.add(c[4]);
-                timeOut.add(c[5]);
+                String[] column   = splitCSV(reader.nextLine());
+                dtrEmployeeNumber.add(column[0]);
+                dtrDate.add(column[3]);
+                timeIn.add(column[4]);
+                timeOut.add(column[5]);
                 dailyHours.add(0.0); 
                 parsedIn.add(null);  
                 parsedOut.add(null);
             }
-            f.close();
+            reader.close();
         } catch (FileNotFoundException e) {
             System.out.println("Could not open DTR file: " + e.getMessage());
             System.exit(1);
@@ -404,7 +443,7 @@ public class MotorPH {
             parsedOut.set(i, LocalTime.parse(timeOut.get(i).trim(), format));
             LocalTime login;
 
-           if (!parsedIn.get(i).isAfter(grace)) {
+            if (!parsedIn.get(i).isAfter(grace)) {
                 dailyHours.set(i, 8.0);
                 continue;
             } else {
@@ -412,7 +451,7 @@ public class MotorPH {
             }
             LocalTime logout = parsedOut.get(i).isAfter(end) ? end : parsedOut.get(i);
             long mins = Duration.between(login, logout).toMinutes();
-            mins = (mins > 60) ? mins - 60 : 0; // Deduct 1-hour lunch if applicable.   
+            mins = (mins > 60) ? mins - 60 : 0; // Deduct 1-hour lunch to the day's hours worked (provided the employee stayed for more than 1 hour).   
             dailyHours.set(i, Math.min(mins / 60.0, 8.0)); // Cap daily hours at 8.
         }
     }
@@ -428,13 +467,13 @@ public class MotorPH {
      *             an entry in the dtrEmployeeNumber array.
      * @param half The cutoff period; must be either "first" (days 1-15) 
      *             or "second" (days 16-end).
-     * @param mo   June to December, as an integer (6-12).
+     * @param month   June to December, as an integer (6-12).
      * @return     The total hours worked, capped at the maximum 
      *             standard hours for the period.
      * 
      * ==============================================================
      */
-    static double getHours(String num, String half, int mo) {
+    static double getHours(String num, String half, int month) {
         double total = 0;
         for (int j = 0; j < timeIn.size(); j++) {
             if (!num.equals(dtrEmployeeNumber.get(j))) continue;
@@ -443,14 +482,14 @@ public class MotorPH {
                 String[] d = dtrDate.get(j).trim().split("/");
                 int m   = Integer.parseInt(d[0]);
                 int day = Integer.parseInt(d[1]);
-                if (m != mo) continue;
+                if (m != month) continue;
                 // Add hours for the selected cutoff period.
                 if ("first".equals(half)  && day >= 1  && day <= 15) total += dailyHours.get(j);
                 if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(j);
             } catch (Exception ignored) {}
         }
         // Cap to max working hours for the period.
-        int lastDay = YearMonth.of(2024, mo).lengthOfMonth();
+        int lastDay = YearMonth.of(2024, month).lengthOfMonth();
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
         return Math.min(total, maxDays * 8.0);
     }
@@ -542,7 +581,7 @@ public class MotorPH {
 
      /**
      * ==============================================================
-     * Calculates the employee's share of Pag-Ibig contributions.
+     * Calculates the employee's share of Pag-IBIG contributions.
      * 
      * Rules:
      * - Contribution is 1% of the base pay if the base pay is less than or equal to 1,500.
@@ -605,27 +644,26 @@ public class MotorPH {
      * Leading and trailing spaces are trimmed from each field.
      * 
      * @param line The CSV line to split.
-     * @return     An array of strings representing each column in the CSV line.
+     * @return cols An array of strings representing each column in the CSV line.
      * 
      * ==============================================================
      */
     static String[] splitCSV(String line) {
         boolean quoted = false;
-        StringBuilder buf = new StringBuilder();
-        int col = 0;
+        StringBuilder buffer = new StringBuilder();
+        int column = 0;
         for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-            if (c == '"') {
+            char character = line.charAt(i);
+            if (character == '"') {
                 quoted = !quoted;
-            } else if (c == ',' && !quoted) {
-                if (col < cols.length) cols[col++] = buf.toString().trim();
-                buf = new StringBuilder();
+            } else if (character == ',' && !quoted) {
+                if (column < cols.length) cols[column++] = buffer.toString().trim();
+                buffer = new StringBuilder();
             } else {
-                buf.append(c);
+                buffer.append(character);
             }
         }
-        if (col < cols.length) cols[col] = buf.toString().trim();
-        return cols;
+        if (column < cols.length) cols[column] = buffer.toString().trim();
+        return cols; //cols is the buffer variable used to store the data from this method. See its definition below the public class header. 
     }
 }
-
