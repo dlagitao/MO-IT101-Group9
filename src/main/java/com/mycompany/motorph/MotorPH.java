@@ -433,29 +433,38 @@ public class MotorPH {
      */
     static void computeDailyHours() {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("H:mm", Locale.ENGLISH);
-        LocalTime grace = LocalTime.of(8, 10); 
-        LocalTime end   = LocalTime.of(17, 0);
+        LocalTime graceEnd   = LocalTime.of(8, 10);
+        LocalTime workStart  = LocalTime.of(8,  0);
+        LocalTime workEnd    = LocalTime.of(17, 0);
 
         for (int i = 0; i < timeIn.size(); i++) {
+            // Skip if time-in or time-out is missing.
             if (timeIn.get(i) == null || timeOut.get(i) == null) continue;
 
-            parsedIn.set(i, LocalTime.parse(timeIn.get(i).trim(),  format));
-            parsedOut.set(i, LocalTime.parse(timeOut.get(i).trim(), format));
-            LocalTime login;
+            // Parse time-in and time-out strings into LocalTime.
+            LocalTime login  = LocalTime.parse(timeIn.get(i).trim(),  format);
+            LocalTime logout = LocalTime.parse(timeOut.get(i).trim(), format);
+            
+            parsedIn.set(i,  login);
+            parsedOut.set(i, logout);
+            
+             // Snap login to 8:00 AM if arrived within the grace period (on or before 8:10 AM).
+            if (!login.isAfter(graceEnd)) login = workStart;
+            
+            // Cap logout at 5:00 PM — no overtime counted.
+            if (logout.isAfter(workEnd)) logout = workEnd;
+            // Compute total minutes worked between (adjusted) login and logout.
+            long totalMinutes = Duration.between(login, logout).toMinutes();
 
-            if (!parsedIn.get(i).isAfter(grace)) {
-                dailyHours.set(i, 8.0);
-                continue;
-            } else {
-                login = parsedIn.get(i);
-            }
-            LocalTime logout = parsedOut.get(i).isAfter(end) ? end : parsedOut.get(i);
-            long mins = Duration.between(login, logout).toMinutes();
-            mins = (mins > 60) ? mins - 60 : 0; // Deduct 1-hour lunch to the day's hours worked (provided the employee stayed for more than 1 hour).   
-            dailyHours.set(i, Math.min(mins / 60.0, 8.0)); // Cap daily hours at 8.
-        }
+            // Deduct a 1-hour lunch break, only if the employee worked more than 1 hour.
+            totalMinutes = (totalMinutes > 60) ? totalMinutes - 60 : 0;
+
+            // Convert to hours and cap at 8.0 hours.
+            double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
+
+            dailyHours.set(i, hoursWorked);
     }
-
+}
     /**
      * ==============================================================
      * Calculates total hours worked by an employee for a specific 
