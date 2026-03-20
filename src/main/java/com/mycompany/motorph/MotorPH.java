@@ -448,21 +448,18 @@ public class MotorPH {
             parsedIn.set(i,  login);
             parsedOut.set(i, logout);
             
-             // Snap login to 8:00 AM if arrived within the grace period (on or before 8:10 AM).
+            // Snap to 8:00 AM if arrived within grace period (on or before 8:10 AM).
             if (!login.isAfter(graceEnd)) login = workStart;
-            
+
             // Cap logout at 5:00 PM — no overtime counted.
             if (logout.isAfter(workEnd)) logout = workEnd;
-            // Compute total minutes worked between (adjusted) login and logout.
-            long totalMinutes = Duration.between(login, logout).toMinutes();
 
-            // Deduct a 1-hour lunch break, only if the employee worked more than 1 hour.
+            // Compute minutes worked, deduct 1-hour lunch.
+            long totalMinutes = Duration.between(login, logout).toMinutes();
             totalMinutes = (totalMinutes > 60) ? totalMinutes - 60 : 0;
 
-            // Convert to hours and cap at 8.0 hours.
-            double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
-
-            dailyHours.set(i, hoursWorked);
+            // Cap at 8 hours and save.
+            dailyHours.set(i, Math.min(totalMinutes / 60.0, 8.0));
     }
 }
     /**
