@@ -250,8 +250,7 @@ public class MotorPH {
         
         double sss        = sssTable(combinedGross); // Computed from monthly earnings, not per cutoff salary.
         double philHealth = philhealthShare(combinedGross); 
-        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website.
-                                                // Capped at 100PHP monthly, 
+        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly
         double taxable    = combinedGross - sss - philHealth - pagIbig; // The result of this is the employee's income that can still be taxed, after applying all gov't deductions (except tax) to gross income.
         double whTax      = withholdingTax(taxable);
         double totalDed   = sss + philHealth + pagIbig + whTax;
@@ -467,9 +466,9 @@ public class MotorPH {
                         ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<Double> dailyHours, ArrayList<LocalTime> parsedIn, ArrayList<LocalTime> parsedOut) {
         try {
             Scanner reader = new Scanner(new FileReader(path));
-            if (reader.hasNextLine()) reader.nextLine(); // Skip the header row.
+            if (reader.hasNextLine()) reader.nextLine(); // Skips the header row.
             while (reader.hasNextLine()) {
-                // Split the CSV line into columns.
+                // Splits the CSV line into columns.
                 String[] column   = splitCSV(reader.nextLine());
                 dtrEmployeeNumber.add(column[0]);
                 dtrDate.add(column[3]);
