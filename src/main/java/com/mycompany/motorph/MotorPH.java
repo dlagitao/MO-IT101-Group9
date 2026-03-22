@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * ==============================================================
  * Contains all primary variables and data for use in the system.
  * Handles CSV data reading, employee details presentation,
- * calculation of working hours, and payroll calculation
+ * and payroll and hours worked calculation
  * from June to December 2024.
  * 
  * @author Cail Maven Lusares
@@ -34,7 +34,7 @@ public class MotorPH {
     /**
      * ==============================================================
      * Starts the MotorPH Payroll System by loading employee and 
-     * DTR data from CSV files, computing daily work hours, 
+     * DTR data from CSV files, computing daily hours worked, 
      * and then directing the user to either the Employee or 
      * Payroll Staff Portal after logging in.
      *
@@ -69,7 +69,9 @@ public class MotorPH {
         Scanner scanner = new Scanner(System.in);
 
         boolean loggedIn = false;
-        
+
+        // Loop continues until valid credentials are entered.
+        // Prevents access to the system without authentication.
         while(!loggedIn) {
             System.out.print("Username: ");
             String userName = scanner.nextLine();
@@ -124,7 +126,7 @@ public class MotorPH {
             } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 scanner.close();
-                System.exit(0);
+                System.exit(0); // Terminates the system immediately if selected.
             } else {
                 System.out.println("Please enter 1 or 2 only.");
             }
@@ -133,7 +135,7 @@ public class MotorPH {
 
     /**
      * ==============================================================
-     * Displays the Payroll Portal where the user can choose to 
+     * Displays the Payroll Staff Portal where the user can choose to 
      * either generate a payslip or exit the system.
      * 
      * @param scanner           Scanner object used to read user input.
@@ -246,15 +248,16 @@ public class MotorPH {
         double gross2 = hrs2 * rate;
         double combinedGross   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
         
-        double sss        = sssTable(combinedGross);
-        double philHealth = philhealthShare(combinedGross);
-        double pagIbig    = pagibigShare(base); // Pag-IBIG uses contracted salary per HDMF rules.
+        double sss        = sssTable(combinedGross); // Computed from monthly earnings, not per cutoff salary.
+        double philHealth = philhealthShare(combinedGross); 
+        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website.
+                                                // Capped at 100PHP monthly, 
         double taxable    = combinedGross - sss - philHealth - pagIbig; // The result of this is the employee's income that can still be taxed, after applying all gov't deductions (except tax) to gross income.
         double whTax      = withholdingTax(taxable);
         double totalDed   = sss + philHealth + pagIbig + whTax;
 
         double net1 = gross1; // First cutoff: no government deductions.
-        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied.
+        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied, as per company policy
 
         String monthLabel   = monthLabel(month);
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
@@ -335,7 +338,7 @@ public class MotorPH {
     
     /**
      * ==============================================================
-     * Process payroll for a single employee.
+     * Processes payroll for a single employee.
      * The method first requests for the Employee ID.
      * It then displays the employee ID, full name,
      * and birthday before calling the processPayroll method.
@@ -374,7 +377,7 @@ public class MotorPH {
     
     /**
      * ==============================================================
-     * Process payroll for all employees (bulk).
+     * Processes payroll for all employees (bulk).
      * * Similar to processSingleEmployee(), but processes payroll for all employees.
      *
      * @param scanner           Scanner object used to read user input.
@@ -424,9 +427,9 @@ public class MotorPH {
                               ArrayList<String> firstName, ArrayList<String> birthDay, ArrayList<String> basePay, ArrayList<String> hourlyRate) {
         try {
             Scanner reader = new Scanner(new FileReader(path));
-            if (reader.hasNextLine()) reader.nextLine(); // Skip the header row.
+            if (reader.hasNextLine()) reader.nextLine(); // Skips the header row.
             while (reader.hasNextLine()) {
-                // Split the CSV line into columns.
+                // Splits the CSV line into columns.
                 String[] column = splitCSV(reader.nextLine());
                 employeeNumber.add(column[0]);
                 lastName.add(column[1]);
@@ -485,7 +488,7 @@ public class MotorPH {
 
     /**
      * ==============================================================
-     * Computes daily working hours for all employees in advance.
+     * Computes daily hours worked for all employees in advance.
      *
      * Important note: This method pre-computes daily hours to 
      * avoid recalculating them whenever a payslip is generated.
@@ -519,18 +522,18 @@ public class MotorPH {
             parsedIn.set(index,  login);
             parsedOut.set(index, logout);
             
-            // Snap to 8:00 AM if arrived within grace period (on or before 8:10 AM).
+            // Snaps to 8:00 AM if arrivval is within grace period (on or before 8:10 AM).
             if (!login.isAfter(graceEnd)) login = workStart;
 
-            // Cap logout at 5:00 PM — no overtime counted.
+            // Caps logout at 5:00 PM — no overtime counted.
             if (logout.isAfter(workEnd)) logout = workEnd;
 
-            // Compute minutes worked, then deduct 1-hour lunch.
+            // Computes minutes worked, then deducts 1-hour lunch.
             long totalMinutes = Duration.between(login, logout).toMinutes();
-            // Deduct the 1-hour lunch ONLY if logged duration is more than 1 hour
+            // Deducts the 1-hour lunch ONLY if logged duration is more than 1 hour.
             totalMinutes = (totalMinutes > 60) ? totalMinutes - 60 : 0; 
 
-            // Cap at 8 hours and save.
+            // Caps at 8 hours and saves.
             double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
 
             dailyHours.set(index, hoursWorked);
@@ -575,6 +578,8 @@ public class MotorPH {
         }
         // Cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
+        // First cutoff ALWAYS covers 10 working days.
+        // Second cutoff may include an extra workday in months with 31 days.
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
         return Math.min(total, maxDays * 8.0);
     }
@@ -720,6 +725,9 @@ public class MotorPH {
      * @return columns An array of strings representing each column in the CSV line.
      * * ==============================================================
      */
+
+    // Custom CSV parser is used because some fields may contain commas inside quotes,
+    // which would break a simple split(",") approach.
     static String[] splitCSV(String line) {
         String[] columns = new String[19]; // Temporary buffer used when parsing CSV columns.
         boolean quoted = false; 
