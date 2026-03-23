@@ -585,7 +585,7 @@ public class MotorPH {
             if (!num.equals(dtrEmployeeNumber.get(index))) continue;
             if (dtrDate.get(index) == null) continue;
             try {
-                String[] date = dtrDate.get(index).trim().split(" ");
+                String[] date = dtrDate.get(index).trim().split("/");
                 int currentMonth   = Integer.parseInt(date[0]);
                 int day = Integer.parseInt(date[1]);
                 if (currentMonth != month) continue;
