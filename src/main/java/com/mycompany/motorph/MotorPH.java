@@ -45,26 +45,33 @@ public class MotorPH {
      * ==============================================================
      */
     public static void main(String[] args) throws FileNotFoundException {
-        // Employee information.
-        ArrayList<String> employeeNumber   = new ArrayList<>();
-        ArrayList<String> lastName   = new ArrayList<>();
-        ArrayList<String> firstName  = new ArrayList<>();
-        ArrayList<String> birthDay   = new ArrayList<>();
-        ArrayList<String> basePay   = new ArrayList<>();
-        ArrayList<String> hourlyRate   = new ArrayList<>();
+        class Employee {
+            // Employee information.
+            static ArrayList<String> employeeNumber   = new ArrayList<>();
+            static ArrayList<String> lastName   = new ArrayList<>();
+            static ArrayList<String> firstName  = new ArrayList<>();
+            static ArrayList<String> birthDay   = new ArrayList<>();
+            static ArrayList<String> basePay   = new ArrayList<>();
+            static ArrayList<String> hourlyRate   = new ArrayList<>();
+        }
+
+        class EmployeeDTRData {
+            // Daily Time Record (DTR) data.
+            static ArrayList<String>    dtrEmployeeNumber  = new ArrayList<>();
+            static ArrayList<String>    dtrDate  = new ArrayList<>();
+            static ArrayList<String>    timeIn  = new ArrayList<>();
+            static ArrayList<String>    timeOut  = new ArrayList<>();
+            static ArrayList<LocalTime>    parsedIn  = new ArrayList<>();
+            static ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
+            static ArrayList<Double>    dailyHours  = new ArrayList<>();
+        }
         
-        // Daily Time Record (DTR) data.
-        ArrayList<String>    dtrEmployeeNumber  = new ArrayList<>();
-        ArrayList<String>    dtrDate  = new ArrayList<>();
-        ArrayList<String>    timeIn  = new ArrayList<>();
-        ArrayList<String>    timeOut  = new ArrayList<>();
-        ArrayList<LocalTime>    parsedIn  = new ArrayList<>();
-        ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
-        ArrayList<Double>    dailyHours  = new ArrayList<>();
     
-        loadEmployees("resources/motorphemployeedata.csv", employeeNumber, lastName, firstName, birthDay, basePay, hourlyRate);
-        loadDTR("resources/loginandout.csv", dtrEmployeeNumber, dtrDate, timeIn, timeOut, dailyHours, parsedIn, parsedOut);
-        computeDailyHours(timeIn, timeOut, parsedIn, parsedOut, dailyHours);
+        loadEmployees("resources/motorphemployeedata.csv", Employee.employeeNumber, Employee.lastName, Employee.firstName, Employee.birthDay, Employee.basePay, Employee.hourlyRate);
+        loadDTR("resources/loginandout.csv", EmployeeDTRData.dtrEmployeeNumber, EmployeeDTRData.dtrDate, EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.dailyHours, 
+                                             EmployeeDTRData.parsedIn, EmployeeDTRData.parsedOut);
+        computeDailyHours(EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.parsedIn, EmployeeDTRData.parsedOut, EmployeeDTRData.dailyHours);
+
 
         Scanner scanner = new Scanner(System.in);
 
@@ -78,11 +85,11 @@ public class MotorPH {
             System.out.print("Password: ");
             String passWord = scanner.nextLine();
 
-            if ("employee".equals(userName) && "12345".equals(passWord)) {
-                runEmployeePortal(scanner, employeeNumber, lastName, firstName, birthDay);
+             if ("employee".equals(userName) && "12345".equals(passWord)) {
+                runEmployeePortal(scanner, Employee.employeeNumber, Employee.lastName, Employee.firstName, Employee.birthDay);
                 loggedIn = true;
             } else if ("payroll_staff".equals(userName) && "12345".equals(passWord)) {
-                runPayrollPortal(scanner, employeeNumber, firstName, lastName, birthDay, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+                runPayrollPortal(scanner, Employee.employeeNumber, Employee.firstName, Employee.lastName, Employee.birthDay, Employee.hourlyRate, Employee.basePay, EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.dtrEmployeeNumber, EmployeeDTRData.dtrDate, EmployeeDTRData.dailyHours);
                 loggedIn = true;
             } else {
                 System.out.println("Incorrect username and/or password. Please try again.\n");
@@ -514,28 +521,40 @@ public class MotorPH {
             // Skip if time-in or time-out is missing.
             if (timeIn.get(index) == null || timeOut.get(index) == null) continue;
 
-            // Parse time-in and time-out strings into LocalTime.
-            LocalTime login  = LocalTime.parse(timeIn.get(index).trim(),  format);
-            LocalTime logout = LocalTime.parse(timeOut.get(index).trim(), format);
-            
-            parsedIn.set(index,  login);
-            parsedOut.set(index, logout);
-            
-            // Snaps to 8:00 AM if arrivval is within grace period (on or before 8:10 AM).
-            if (!login.isAfter(graceEnd)) login = workStart;
+            try {
+                // Parse time-in and time-out strings into LocalTime.
+                LocalTime login  = LocalTime.parse(timeIn.get(index).trim(),  format);
+                LocalTime logout = LocalTime.parse(timeOut.get(index).trim(), format);
+                
+                parsedIn.set(index,  login);
+                parsedOut.set(index, logout);
+                
+                // Caps logout at 5:00 PM — no overtime counted.
+                if (logout.isAfter(workEnd)) logout = workEnd;
+                
+                LocalTime actualStart;
+                if (login.isBefore(workStart)) {           // If an employee arrived before 8:00 AM, sets login time as the actual time.
+                    actualStart = login;
+                } else if (!login.isAfter(graceEnd)) {     // If arrival time is between 8:00 and 8:10 AM, setting login time at 8:00 AM (grace period logic).
+                    actualStart = workStart;              
+                } else {                                   // If employee's arrival time is after 8:10 AM, sets login time as the actual time.
+                    actualStart = login;
+                }
+                
+                // Computes minutes worked, then deducts 1-hour lunch.
+                long totalMinutes = Duration.between(actualStart, logout).toMinutes();
+                
+                // Deducts the 1-hour lunch ONLY if logged duration is more than 1 hour.
+                totalMinutes = (totalMinutes > 60) ? totalMinutes - 60 : 0; 
+                
+                double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
 
-            // Caps logout at 5:00 PM — no overtime counted.
-            if (logout.isAfter(workEnd)) logout = workEnd;
-
-            // Computes minutes worked, then deducts 1-hour lunch.
-            long totalMinutes = Duration.between(login, logout).toMinutes();
-            // Deducts the 1-hour lunch ONLY if logged duration is more than 1 hour.
-            totalMinutes = (totalMinutes > 60) ? totalMinutes - 60 : 0; 
-
-            // Caps at 8 hours and saves.
-            double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
-
-            dailyHours.set(index, hoursWorked);
+                // Caps at 8 hours and saves.
+                dailyHours.set(index, Math.max(0.0, hoursWorked));
+                
+            } catch (Exception e) {
+                dailyHours.set(index, 0.0);
+            }
         }
     }
     
@@ -566,7 +585,7 @@ public class MotorPH {
             if (!num.equals(dtrEmployeeNumber.get(index))) continue;
             if (dtrDate.get(index) == null) continue;
             try {
-                String[] date = dtrDate.get(index).trim().split("/");
+                String[] date = dtrDate.get(index).trim().split(" ");
                 int currentMonth   = Integer.parseInt(date[0]);
                 int day = Integer.parseInt(date[1]);
                 if (currentMonth != month) continue;
