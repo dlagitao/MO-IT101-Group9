@@ -14,6 +14,6 @@ Note: The program will display an error if your two CSV files (in resources fold
 DO NOT change the names of the files as this will cause a fatal error in the code.
 
 # Project Plan Link
-[MO-IT101 | Project Plan | Group 9](https://docs.google.com/spreadsheets/d/1WlIARQ4i5YYXuoHAFWQ0-WrjFXaR7PQhrGVMQlnImgE/edit?usp=sharing)
+[MO-IT101 | Project Plan | Group 9](https://docs.google.com/spreadsheets/d/119dqH4O-P7GSN7h4m9WyDgcH14egNLTKlHD1mQ2Fo1Q/edit?gid=627646081#gid=627646081)
 
 Note: This plan is periodically revised and is subject to change.
