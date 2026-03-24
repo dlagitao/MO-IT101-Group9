@@ -260,7 +260,7 @@ public class MotorPH {
         double sss        = sssTable(combinedGross); // Computed from monthly earnings, not per cutoff salary.
         double philHealth = philhealthShare(combinedGross); 
         double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly.
-        double taxable    = combinedGross - sss - philHealth - pagIbig; // Calculates taxable income after applying all statutory deductions (excluding tax).
+        double taxable    = combinedGross - sss - philHealth - pagIbig; // Calculates taxable income after applying all government deductions (excluding tax).
         double whTax      = withholdingTax(taxable); // Uses progressive tax system: base tax + % of excess over the bracket threshold.
         double totalDed   = sss + philHealth + pagIbig + whTax;
 
