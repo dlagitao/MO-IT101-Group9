@@ -3,7 +3,7 @@
 2. Dayag, Luis Carlo – Led unit testing, explained main method workflows, authored Java comments, code flow presentation, and performed QA testing.
 3. Gonzales, Marlu – Led the project and the collection of client requirements, developed calculation logic, authored Java comments, and performed debugging and revisions.
 4. Lagitao, Dominic – Led QA testing, managed the project plan, assisted in migration to Java using Maven, conducted unit testing, drafted flow presentation scripts, and authored Java comments.
-5. Lusares, Cail Maven – Managed project documentation, udpdated the project plan, created the flow presentation, conducted unit testing, code flow presentation, and performed QA testing.
+5. Lusares, Cail Maven – Managed project documentation, updated the project plan, created the flow presentation, conducted unit testing, code flow presentation, and performed QA testing.
 
 # What is the MotorPH Payroll System?
 Based on Java with Maven, this payroll system, once running in your terminal, allows you to perform the following:
