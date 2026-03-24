@@ -133,7 +133,7 @@ public class MotorPH {
             } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 scanner.close();
-                System.exit(0); // Terminates the system immediately if selected.
+                System.exit(0); 
             } else {
                 System.out.println("Please enter 1 or 2 only.");
             }
@@ -244,26 +244,28 @@ public class MotorPH {
      * @param dailyHours        List of pre-computed daily work hours.
      * ==============================================================
      */
+    
     static void processPayroll(String num, int index, int month, ArrayList<String> employeeNumber, ArrayList<String> hourlyRate, ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String>dtrEmployeeNumber, ArrayList<String>dtrDate, ArrayList<Double> dailyHours) {
         num  = employeeNumber.get(index);
         double rate = Double.parseDouble(hourlyRate.get(index));
         double base = Double.parseDouble(basePay.get(index));
         double hrs1   = getHours(num, "first",  month, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
         double hrs2   = getHours(num, "second", month, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
-        
+
+        // Payroll is split into two cutoffs.
         double gross1 = hrs1 * rate;
         double gross2 = hrs2 * rate;
         double combinedGross   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
         
         double sss        = sssTable(combinedGross); // Computed from monthly earnings, not per cutoff salary.
         double philHealth = philhealthShare(combinedGross); 
-        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly
-        double taxable    = combinedGross - sss - philHealth - pagIbig; // The result of this is the employee's income that can still be taxed, after applying all gov't deductions (except tax) to gross income.
-        double whTax      = withholdingTax(taxable);
+        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly.
+        double taxable    = combinedGross - sss - philHealth - pagIbig; // Calculates taxable income after applying all statutory deductions (excluding tax).
+        double whTax      = withholdingTax(taxable); // Uses progressive tax system: base tax + % of excess over the bracket threshold.
         double totalDed   = sss + philHealth + pagIbig + whTax;
 
-        double net1 = gross1; // First cutoff: no government deductions.
-        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied, as per company policy
+        double net1 = gross1; // First cutoff comprises of earnings only, no government deductions applied, as per company payroll distribution policy.
+        double net2 = gross2 - totalDed; // Only second cutoff applies government deducations (SSS, PhilHealth, Pag-IBIG, tax), as per company payroll distribution policy.
 
         String monthLabel   = monthLabel(month);
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
@@ -322,9 +324,9 @@ public class MotorPH {
     /**
      * ==============================================================
      * This method displays employee details.
-     * Taking the index variable "index" as input,
-     * it then displays the ID, full name, 
-     * and birthday within the variable "index".
+     * It takes the index as input,
+     * and then displays the ID, full name, 
+     * and birthday at the given index.
      * 
      * @param index          Index variable that describes the row in which
      *                       the correct information can be found.
@@ -383,8 +385,8 @@ public class MotorPH {
     
     /**
      * ==============================================================
-     * Processes payroll for all employees (bulk).
-     * * Similar to processSingleEmployee(), but processes payroll for all employees.
+     * Similar to processSingleEmployee(), 
+     * but processes payroll for all employees (bulk).
      *
      * @param scanner           Scanner object used to read user input.
      * @param employeeNumber    List of employee ID numbers.
@@ -415,8 +417,8 @@ public class MotorPH {
     /**
      * ==============================================================
      * Loads the employee master list from a CSV file.
-     * Stores employee ID, last name, first name, birthday, 
-     * base pay, and hourly rate.
+     * Stores employee IDs, last names, first names, birthdays, 
+     * base pays, and hourly rates.
      * 
      * @param path           The file pathname to the CSV file.
      * @param employeeNumber List to store employee IDs.
@@ -455,7 +457,7 @@ public class MotorPH {
      * ==============================================================
      * Loads DTR data from a CSV file (Log-in and logout times).
      *
-     * Stores employee ID, date, time-in, and time-out.
+     * Stores employee IDs, dates, time-ins, and time-outs.
      * 
      * @param path              The file pathname to the CSV file
      * @param dtrEmployeeNumber List to store employee IDs from DTR.
@@ -495,9 +497,9 @@ public class MotorPH {
     /**
      * ==============================================================
      * Computes daily hours worked for all employees in advance.
-     *
-     * Important note: This method pre-computes daily hours to 
-     * avoid recalculating them whenever a payslip is generated.
+     * This method pre-computes daily hours to avoid recalculation
+     * during payslip generation.
+     * 
      * Rules:
      * - Arrival at or before 8:10 AM is considered on time.
      * - Working hours are capped at 8 hours per day for those on time.
@@ -533,11 +535,11 @@ public class MotorPH {
                 if (logout.isAfter(workEnd)) logout = workEnd;
                 
                 LocalTime actualStart;
-                if (login.isBefore(workStart)) {           // If an employee arrived before 8:00 AM, sets login time as the actual time.
+                if (login.isBefore(workStart)) {           // If employees arrive before 8:00 AM, this sets login time as the actual time.
                     actualStart = login;
-                } else if (!login.isAfter(graceEnd)) {     // If arrival time is between 8:00 and 8:10 AM, setting login time at 8:00 AM (grace period logic).
+                } else if (!login.isAfter(graceEnd)) {     // Applies 10-minute grace period (UP TO 8:10 AM). Employees logging in between 8:00–8:10 are treated as on-time.
                     actualStart = workStart;              
-                } else {                                   // If employee's arrival time is after 8:10 AM, sets login time as the actual time.
+                } else {                                   // Logins after 8:10 are considered late and use actual login time.
                     actualStart = login;
                 }
                 
@@ -561,7 +563,7 @@ public class MotorPH {
     /**
      * ==============================================================
      * Calculates total hours worked by an employee for a specific 
-     * month and cutoff period.
+     * month and cutoff period because payroll is processed twice a month.
      *
      * This is used to compute gross pay.
      *
@@ -596,10 +598,13 @@ public class MotorPH {
         }
         // Cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
-        // First cutoff ALWAYS covers 10 working days.
-        // Second cutoff may include an extra workday in months with 31 days.
+        
+        // First cutoff (days 1–15) assumes 10 workdays (Mon–Fri x 2 weeks).
+        // Second cutoff (days 16–end) may have 11 workdays if the month has 31 days,
+        // which means an extra weekday in longer months.
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
-        return Math.min(total, maxDays * 8.0);
+        return Math.min(total, maxDays * 8.0); // Caps total hours to avoid exceeding standard working hours.
+                                               // (8 hours/day × number of working days in the cutoff period).
     }
 
     /**
@@ -747,7 +752,7 @@ public class MotorPH {
     // Custom CSV parser is used because some fields may contain commas inside quotes,
     // which would break a simple split(",") approach.
     static String[] splitCSV(String line) {
-        String[] columns = new String[19]; // Temporary buffer used when parsing CSV columns.
+        String[] columns = new String[19]; // Stores parsed CSV fields.
         boolean quoted = false; 
         StringBuilder buffer = new StringBuilder();
         int column = 0;
