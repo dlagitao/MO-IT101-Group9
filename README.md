@@ -1,9 +1,9 @@
 # Team Members
-1. Abad, Dominic Gideon Remetio - led current stage, finalized CSV method flows, reviewed code  
-2. Dayag, Luis Carlo - unit testing, explanation for main method flow, added comments
-3. Gonzales, Marlu - led the writing of the calculation logic, reviewed code
-4. Lagitao, Dominic - assisted during migration to Java with Maven, unit testing, drafted flow presentation script, added comments 
-5. Lusares, Cail Maven - updated project plan, created flow presentation, unit testing, added comments
+> Abad, Dominic Gideon Remetio – Led the development of code logic, finalized CSV method flows, authored Java comments, performed debugging and revisions, and optimized code.
+> Dayag, Luis Carlo – Led unit testing, explained main method workflows, authored Java comments, code flow presentation, and performed QA testing.
+> Gonzales, Marlu – Led the project and the collection of client requirements, developed calculation logic, authored Java comments, and performed debugging and revisions.
+> Lagitao, Dominic – Led QA testing, managed the project plan, assisted in migration to Java using Maven, conducted unit testing, drafted flow presentation scripts, and authored Java comments.
+> Lusares, Cail Maven – Managed project documentation, udpdated the project plan, created the flow presentation, conducted unit testing, code flow presentation, and performed QA testing.
 
 # What is the MotorPH Payroll System?
 Based on Java with Maven, this payroll system, once running in your terminal, allows you to perform the following:
@@ -15,5 +15,3 @@ DO NOT change the names of the files as this will cause a fatal error in the cod
 
 # Project Plan Link
 [MO-IT101 | Project Plan | Group 9](https://docs.google.com/spreadsheets/d/119dqH4O-P7GSN7h4m9WyDgcH14egNLTKlHD1mQ2Fo1Q/edit?gid=627646081#gid=627646081)
-
-Note: This plan is periodically revised and is subject to change.
