@@ -347,9 +347,8 @@ public class MotorPH {
     /**
      * ==============================================================
      * Processes payroll for a single employee.
-     * The method first requests for the Employee ID.
-     * It then displays the employee ID, full name,
-     * and birthday before calling the processPayroll method.
+     * Prompts for an employee ID, displays the employee’s ID, 
+     * full name, and birthday, then calls processPayroll.
      * 
      * @param scanner           Scanner object used to read user input.
      * @param employeeNumber    List of employee ID numbers.
@@ -603,8 +602,7 @@ public class MotorPH {
         // Second cutoff (days 16–end) may have 11 workdays if the month has 31 days,
         // which means an extra weekday in longer months.
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
-        return Math.min(total, maxDays * 8.0); // Caps total hours to avoid exceeding standard working hours.
-                                               // (8 hours/day × number of working days in the cutoff period).
+        return Math.min(total, maxDays * 8.0); // Caps total hours to avoid exceeding standard working hours (8 hours/day × number of working days in the cutoff period).
     }
 
     /**
