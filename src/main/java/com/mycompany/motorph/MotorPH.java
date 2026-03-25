@@ -31,6 +31,28 @@ import java.util.ArrayList;
  */
 
 public class MotorPH {
+    
+        static class Employee {
+            // Employee information.
+            ArrayList<String> employeeNumber   = new ArrayList<>();
+            ArrayList<String> lastName   = new ArrayList<>();
+            ArrayList<String> firstName  = new ArrayList<>();
+            ArrayList<String> birthDay   = new ArrayList<>();
+            ArrayList<String> basePay   = new ArrayList<>();
+            ArrayList<String> hourlyRate   = new ArrayList<>();
+        }
+
+        static class EmployeeDTRData {
+            // Daily Time Record (DTR) data.
+            ArrayList<String>    dtrEmployeeNumber  = new ArrayList<>();
+            ArrayList<String>    dtrDate  = new ArrayList<>();
+            ArrayList<String>    timeIn  = new ArrayList<>();
+            ArrayList<String>    timeOut  = new ArrayList<>();
+            ArrayList<LocalTime>    parsedIn  = new ArrayList<>();
+            ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
+            ArrayList<Double>    dailyHours  = new ArrayList<>();
+        }
+        
     /**
      * ==============================================================
      * Starts the MotorPH Payroll System by loading employee and 
@@ -45,32 +67,13 @@ public class MotorPH {
      * ==============================================================
      */
     public static void main(String[] args) throws FileNotFoundException {
-        class Employee {
-            // Employee information.
-            static ArrayList<String> employeeNumber   = new ArrayList<>();
-            static ArrayList<String> lastName   = new ArrayList<>();
-            static ArrayList<String> firstName  = new ArrayList<>();
-            static ArrayList<String> birthDay   = new ArrayList<>();
-            static ArrayList<String> basePay   = new ArrayList<>();
-            static ArrayList<String> hourlyRate   = new ArrayList<>();
-        }
-
-        class EmployeeDTRData {
-            // Daily Time Record (DTR) data.
-            static ArrayList<String>    dtrEmployeeNumber  = new ArrayList<>();
-            static ArrayList<String>    dtrDate  = new ArrayList<>();
-            static ArrayList<String>    timeIn  = new ArrayList<>();
-            static ArrayList<String>    timeOut  = new ArrayList<>();
-            static ArrayList<LocalTime>    parsedIn  = new ArrayList<>();
-            static ArrayList<LocalTime>    parsedOut  = new ArrayList<>();
-            static ArrayList<Double>    dailyHours  = new ArrayList<>();
-        }
+        Employee employee = new Employee();
+        EmployeeDTRData dtr = new EmployeeDTRData();
         
     
-        loadEmployees("resources/motorphemployeedata.csv", Employee.employeeNumber, Employee.lastName, Employee.firstName, Employee.birthDay, Employee.basePay, Employee.hourlyRate);
-        loadDTR("resources/loginandout.csv", EmployeeDTRData.dtrEmployeeNumber, EmployeeDTRData.dtrDate, EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.dailyHours, 
-                                             EmployeeDTRData.parsedIn, EmployeeDTRData.parsedOut);
-        computeDailyHours(EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.parsedIn, EmployeeDTRData.parsedOut, EmployeeDTRData.dailyHours);
+        loadEmployees(employee, "resources/motorphemployeedata.csv");
+        loadDTR(dtr, "resources/loginandout.csv");
+        computeDailyHours(dtr);
 
 
         Scanner scanner = new Scanner(System.in);
@@ -86,10 +89,10 @@ public class MotorPH {
             String passWord = scanner.nextLine();
 
              if ("employee".equals(userName) && "12345".equals(passWord)) {
-                runEmployeePortal(scanner, Employee.employeeNumber, Employee.lastName, Employee.firstName, Employee.birthDay);
+                runEmployeePortal(scanner, employee);
                 loggedIn = true;
             } else if ("payroll_staff".equals(userName) && "12345".equals(passWord)) {
-                runPayrollPortal(scanner, Employee.employeeNumber, Employee.firstName, Employee.lastName, Employee.birthDay, Employee.hourlyRate, Employee.basePay, EmployeeDTRData.timeIn, EmployeeDTRData.timeOut, EmployeeDTRData.dtrEmployeeNumber, EmployeeDTRData.dtrDate, EmployeeDTRData.dailyHours);
+                runPayrollPortal(scanner, employee, dtr);
                 loggedIn = true;
             } else {
                 System.out.println("Incorrect username and/or password. Please try again.\n");
@@ -103,14 +106,11 @@ public class MotorPH {
      * employee details or exit the system.
      * No access to payroll processing.
      * 
-     * @param scanner        Scanner object used to read user input.
-     * @param employeeNumber List of employee ID numbers.
-     * @param lastName       List of employee last names.
-     * @param firstName      List of employee first names.
-     * @param birthDay       List of employee birthdays.
+     * @param scanner       Scanner object used to read user input.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
      * ==============================================================
      */
-    static void runEmployeePortal(Scanner scanner, ArrayList<String> employeeNumber, ArrayList<String> lastName, ArrayList<String> firstName, ArrayList<String> birthDay) {
+    static void runEmployeePortal(Scanner scanner, Employee employee) {
         while (true) {
             System.out.println("\n---- Employee Portal ----");
             System.out.println("[1] Check Employee Profile");
@@ -121,9 +121,9 @@ public class MotorPH {
                 System.out.print("Enter your Employee No.: ");
                 String num = scanner.nextLine().trim();
                 boolean hit = false;
-                for (int index = 0; index < employeeNumber.size(); index++) {
-                    if (num.equals(employeeNumber.get(index))) {
-                        displayEmployeeDetails(index, employeeNumber, firstName, lastName, birthDay);
+                for (int index = 0; index < employee.employeeNumber.size(); index++) {
+                    if (num.equals(employee.employeeNumber.get(index))) {
+                        displayEmployeeDetails(index, employee);
                         hit = true;
                         break;
                     }
@@ -133,7 +133,7 @@ public class MotorPH {
             } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 scanner.close();
-                System.exit(0); 
+                System.exit(0); // Terminates the system immediately if selected.
             } else {
                 System.out.println("Please enter 1 or 2 only.");
             }
@@ -145,22 +145,12 @@ public class MotorPH {
      * Displays the Payroll Staff Portal where the user can choose to 
      * either generate a payslip or exit the system.
      * 
-     * @param scanner           Scanner object used to read user input.
-     * @param employeeNumber    List of employee ID numbers.
-     * @param firstName         List of employee first names.
-     * @param lastName          List of employee last names.
-     * @param birthDay          List of employee birthdays.
-     * @param hourlyRate        List of employee hourly rates.
-     * @param basePay           List of employee monthly base salaries.
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee IDs from DTR records.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param scanner       Scanner object used to read user input.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
+     * @param dtr           Employee daily time record (DTR) data.
      * ==============================================================
      */
-    static void runPayrollPortal(Scanner scanner, ArrayList<String> employeeNumber, ArrayList<String> firstName, ArrayList<String> lastName, ArrayList<String> birthDay,ArrayList<String> hourlyRate, 
-            ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, ArrayList<Double> dailyHours) {
+    static void runPayrollPortal(Scanner scanner, Employee employee, EmployeeDTRData dtr) {
         while (true) {
             System.out.println("\n---- Payroll Portal ----");
             System.out.println("[1] Generate Payslip");
@@ -168,7 +158,7 @@ public class MotorPH {
             String choice = scanner.nextLine().trim();
 
             if ("1".equals(choice)) {
-                runPayslipMenu(scanner, employeeNumber, firstName, lastName, birthDay, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+                runPayslipMenu(scanner, employee, dtr);
             } else if ("2".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 scanner.close();
@@ -185,22 +175,12 @@ public class MotorPH {
      * choose to either process payroll for a single employee, 
      * all employees, or exit the system.
      * 
-     * @param scanner           Scanner object used to read user input.
-     * @param employeeNumber    List of employee ID numbers.
-     * @param firstName         List of employee first names.
-     * @param lastName          List of employee last names.
-     * @param birthDay          List of employee birthdays.
-     * @param hourlyRate        List of employee hourly rates.
-     * @param basePay           List of employee monthly base salaries.
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee IDs from DTR records.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param scanner       Scanner object used to read user input.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
+     * @param dtr           Employee daily time record (DTR) data.
      * ==============================================================
      */
-    static void runPayslipMenu(Scanner scanner, ArrayList<String> employeeNumber, ArrayList<String> firstName, ArrayList<String> lastName, ArrayList<String> birthDay,ArrayList<String> hourlyRate, 
-            ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, ArrayList<Double> dailyHours) {
+    static void runPayslipMenu(Scanner scanner, Employee employee, EmployeeDTRData dtr) {
         while (true) {
             System.out.println("\n---- Generate Payslip ----");
             System.out.println("[1] Single Employee");
@@ -209,9 +189,9 @@ public class MotorPH {
             String choice = scanner.nextLine().trim();
 
             if ("1".equals(choice)) {
-                processSingleEmployee(scanner, employeeNumber, firstName, lastName, birthDay, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+                processSingleEmployee(scanner, employee, dtr);
             } else if ("2".equals(choice)) {
-                processAllEmployees(scanner, employeeNumber, firstName, lastName, birthDay, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+                processAllEmployees(scanner, employee, dtr);
             } else if ("3".equals(choice)) {
                 System.out.println("Exiting payroll system.");
                 scanner.close();
@@ -231,51 +211,43 @@ public class MotorPH {
      * hourly rate, and base pay, and the results are passed to the 
      * displayPayrollCalculations method for displaying.
      *
-     * @param num               Employee ID as a String.
-     * @param index             Index of the employee in the employee data list.
-     * @param month             Month variable for the display label.
-     * @param employeeNumber    List of employee ID numbers.
-     * @param hourlyRate        List of employee hourly rates.
-     * @param basePay           List of employee monthly base salaries.
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee IDs from DTR records.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param num           Employee ID as a String.
+     * @param index         Index of the employee in the employee data list.
+     * @param month         Month variable for the display label.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
+     * @param dtr           Employee daily time record (DTR) data.
      * ==============================================================
      */
-    
-    static void processPayroll(String num, int index, int month, ArrayList<String> employeeNumber, ArrayList<String> hourlyRate, ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String>dtrEmployeeNumber, ArrayList<String>dtrDate, ArrayList<Double> dailyHours) {
-        num  = employeeNumber.get(index);
-        double rate = Double.parseDouble(hourlyRate.get(index));
-        double base = Double.parseDouble(basePay.get(index));
-        double hrs1   = getHours(num, "first",  month, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
-        double hrs2   = getHours(num, "second", month, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
-
-        // Payroll is split into two cutoffs.
+    static void processPayroll(String num, int index, int month, Employee employee, EmployeeDTRData dtr) {
+        num  = employee.employeeNumber.get(index);
+        double rate = Double.parseDouble(employee.hourlyRate.get(index));
+        double base = Double.parseDouble(employee.basePay.get(index));
+        double hrs1   = getHours(num, "first",  month, dtr);
+        double hrs2   = getHours(num, "second", month, dtr);
+        
         double gross1 = hrs1 * rate;
         double gross2 = hrs2 * rate;
         double combinedGross   = gross1 + gross2; // Total gross pay for the entire month (two cutoffs).
         
         double sss        = sssTable(combinedGross); // Computed from monthly earnings, not per cutoff salary.
         double philHealth = philhealthShare(combinedGross); 
-        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly.
-        double taxable    = combinedGross - sss - philHealth - pagIbig; // Calculates taxable income after applying all government deductions (excluding tax).
-        double whTax      = withholdingTax(taxable); // Uses progressive tax system: base tax + % of excess over the bracket threshold.
+        double pagIbig    = pagibigShare(base); // Mandatory to use the base pay, not the gross pay, based on Pag-IBIG website. Capped at 100PHP monthly
+        double taxable    = combinedGross - sss - philHealth - pagIbig; // The result of this is the employee's income that can still be taxed, after applying all gov't deductions (except tax) to gross income.
+        double whTax      = withholdingTax(taxable);
         double totalDed   = sss + philHealth + pagIbig + whTax;
 
-        double net1 = gross1; // First cutoff comprises of earnings only, no government deductions applied, as per company payroll distribution policy.
-        double net2 = gross2 - totalDed; // Only second cutoff applies government deducations (SSS, PhilHealth, Pag-IBIG, tax), as per company payroll distribution policy.
+        double net1 = gross1; // First cutoff: no government deductions.
+        double net2 = gross2 - totalDed; // Second cutoff: government deductions applied, as per company policy
 
         String monthLabel   = monthLabel(month);
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
-        double cap = (lastDay == 31) ? 88.0 : 80.0; // Cutoff capped to official workdays; overtime not included (80–88 hrs depending on month).
+        double cap = (lastDay == 31) ? 88.0 : 80.0; // 31-month days are given an 11-day work week (11 X 8 = 88 hours); otherwise, the cap is kept within a 10-day work week (10 X 8 = 80).
 
         displayPayrollCalculations(monthLabel, lastDay, hrs1, gross1, net1, hrs2, cap, gross2, sss, philHealth, pagIbig, whTax, totalDed, net2);
     }
     /**
      * ==============================================================
-     * This method is used to display the calculation results of processPayroll.
+     * Method used to display the calculation results of processPayroll.
      * Results are displayed by month and cutoff period.
      * 
      * @param monthLabel The corresponding month of each calculation
@@ -293,7 +265,7 @@ public class MotorPH {
      * @param philHealth PhilHealth deduction for the employee.
      * @param pagIbig    Pag-IBIG deduction for the employee.
      * @param whTax      Employee's withholding tax.
-     * @param totalDed   Total government deductions.
+     * @param totalDed   Total gov't deductions.
      * @param net2       Net salary of the second cutoff.
      * ==============================================================
      */
@@ -324,91 +296,69 @@ public class MotorPH {
     /**
      * ==============================================================
      * This method displays employee details.
-     * It takes the index as input,
-     * and then displays the ID, full name, 
-     * and birthday at the given index.
+     * Taking the index variable "index" as input,
+     * it then displays the ID, full name, 
+     * and birthday within the variable "index".
      * 
      * @param index          Index variable that describes the row in which
      *                       the correct information can be found.
-     * @param employeeNumber List of employee ID numbers.
-     * @param firstName      List of employee first names.
-     * @param lastName       List of employee last names.
-     * @param birthDay       List of employee birthdays.
+     * @param employee       Employee data (ID, name, birthday, hourly rate, base pay)
      * ==============================================================
      */
-    static void displayEmployeeDetails(int index, ArrayList<String> employeeNumber, ArrayList<String> firstName, ArrayList<String> lastName, ArrayList<String> birthDay) {
+    static void displayEmployeeDetails(int index, Employee employee) {
         System.out.println("\n----Employee Details----");
-        System.out.println("Employee #   : " + employeeNumber.get(index));
-        System.out.println("Employee Name: " + firstName.get(index) + " " + lastName.get(index));
-        System.out.println("Birthday     : " + birthDay.get(index));
+        System.out.println("Employee #   : " + employee.employeeNumber.get(index));
+        System.out.println("Employee Name: " + employee.firstName.get(index) + " " + employee.lastName.get(index));
+        System.out.println("Birthday     : " + employee.birthDay.get(index));
     }
    
     
     /**
      * ==============================================================
      * Processes payroll for a single employee.
-     * Prompts for an employee ID, displays the employee’s ID, 
-     * full name, and birthday, then calls processPayroll.
+     * The method first requests for the Employee ID.
+     * It then displays the employee ID, full name,
+     * and birthday before calling the processPayroll method.
      * 
-     * @param scanner           Scanner object used to read user input.
-     * @param employeeNumber    List of employee ID numbers.
-     * @param firstName         List of employee first names.
-     * @param lastName          List of employee last names.
-     * @param birthDay          List of employee birthdays.
-     * @param hourlyRate        List of employee hourly rates.
-     * @param basePay           List of employee monthly base salaries.
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee IDs from DTR records.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param scanner       Scanner object used to read user input.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
+     * @param dtr           Employee daily time record (DTR) data.
      * ==============================================================
      */
-    static void processSingleEmployee(Scanner scanner, ArrayList<String> employeeNumber, ArrayList<String> firstName, ArrayList<String> lastName, 
-                                      ArrayList<String> birthDay, ArrayList<String> hourlyRate, ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, ArrayList<Double> dailyHours) {
+    static void processSingleEmployee(Scanner scanner, Employee employee, EmployeeDTRData dtr) {
         System.out.print("Employee No.: ");
         String num = scanner.nextLine().trim();
         
-        int index = employeeNumber.indexOf(num);
+        int index = employee.employeeNumber.indexOf(num);
         
         if (index == -1) { 
             System.out.println("Employee number does not exist."); return; 
         }
         
-        displayEmployeeDetails(index, employeeNumber, firstName, lastName, birthDay);
+        displayEmployeeDetails(index, employee);
                 
         for (int month = 6; month <= 12; month++) {
-            processPayroll(num, index, month, employeeNumber, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+            processPayroll(num, index, month, employee, dtr);
         }
     }
     
     /**
      * ==============================================================
-     * Similar to processSingleEmployee(), 
-     * but processes payroll for all employees (bulk).
+     * Processes payroll for all employees (bulk).
+     * * Similar to processSingleEmployee(), but processes payroll for all employees.
      *
-     * @param scanner           Scanner object used to read user input.
-     * @param employeeNumber    List of employee ID numbers.
-     * @param firstName         List of employee first names.
-     * @param lastName          List of employee last names.
-     * @param birthDay          List of employee birthdays.
-     * @param hourlyRate        List of employee hourly rates.
-     * @param basePay           List of employee monthly base salaries.
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee IDs from DTR records.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param scanner       Scanner object used to read user input.
+     * @param employee      Employee data (ID, name, birthday, hourly rate, base pay)
+     * @param dtr           Employee daily time record (DTR) data.
      * ==============================================================
      */
-    static void processAllEmployees(Scanner scanner, ArrayList<String> employeeNumber, ArrayList<String> firstName, ArrayList<String> lastName, 
-                                    ArrayList<String> birthDay, ArrayList<String> hourlyRate, ArrayList<String> basePay, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, ArrayList<Double> dailyHours) {
+    static void processAllEmployees(Scanner scanner, Employee employee, EmployeeDTRData dtr) {
         // Loops from June to December.
-        for (int index = 0; index < employeeNumber.size(); index++) {
-            String num = employeeNumber.get(index);
+        for (int index = 0; index < employee.employeeNumber.size(); index++) {
+            String num = employee.employeeNumber.get(index);
             for (int month = 6; month <= 12; month++) {
-                displayEmployeeDetails(index, employeeNumber, firstName, lastName, birthDay);
-                processPayroll(num, index, month, employeeNumber, hourlyRate, basePay, timeIn, timeOut, dtrEmployeeNumber, dtrDate, dailyHours);
+                displayEmployeeDetails(index, employee);
+                processPayroll(num, index, month, employee, dtr);
             }
         }
     }
@@ -416,34 +366,28 @@ public class MotorPH {
     /**
      * ==============================================================
      * Loads the employee master list from a CSV file.
-     * Stores employee IDs, last names, first names, birthdays, 
-     * base pays, and hourly rates.
+     * Stores employee ID, last name, first name, birthday, 
+     * base pay, and hourly rate.
      * 
+     * @param employee       Employee data (ID, name, birthday, hourly rate, base pay)
      * @param path           The file pathname to the CSV file.
-     * @param employeeNumber List to store employee IDs.
-     * @param lastName       List to store last names.
-     * @param firstName      List to store first names.
-     * @param birthDay       List to store birthdays.
-     * @param basePay        List to store monthly base salaries.
-     * @param hourlyRate     List to store hourly rates.
      * @throws               FileNotFoundException if the CSV file is 
      *                       not found at the specified path.
      * ==============================================================
      */
-    static void loadEmployees(String path, ArrayList<String> employeeNumber, ArrayList<String> lastName, 
-                              ArrayList<String> firstName, ArrayList<String> birthDay, ArrayList<String> basePay, ArrayList<String> hourlyRate) {
+    static void loadEmployees(Employee employee, String path) {
         try {
             Scanner reader = new Scanner(new FileReader(path));
             if (reader.hasNextLine()) reader.nextLine(); // Skips the header row.
             while (reader.hasNextLine()) {
                 // Splits the CSV line into columns.
                 String[] column = splitCSV(reader.nextLine());
-                employeeNumber.add(column[0]);
-                lastName.add(column[1]);
-                firstName.add(column[2]);
-                birthDay.add(column[3]);
-                basePay.add(column[13].replace(",", ""));
-                hourlyRate.add(column[18].replace(",", ""));
+                employee.employeeNumber.add(column[0]);
+                employee.lastName.add(column[1]);
+                employee.firstName.add(column[2]);
+                employee.birthDay.add(column[3]);
+                employee.basePay.add(column[13].replace(",", ""));
+                employee.hourlyRate.add(column[18].replace(",", ""));
             }
             reader.close();
         } catch (FileNotFoundException e) {
@@ -456,35 +400,28 @@ public class MotorPH {
      * ==============================================================
      * Loads DTR data from a CSV file (Log-in and logout times).
      *
-     * Stores employee IDs, dates, time-ins, and time-outs.
+     * Stores employee ID, date, time-in, and time-out.
      * 
+     * @param dtr               Employee daily time record (DTR) data.
      * @param path              The file pathname to the CSV file
-     * @param dtrEmployeeNumber List to store employee IDs from DTR.
-     * @param dtrDate           List to store dates from DTR.
-     * @param timeIn            List to store recorded clock-in times.
-     * @param timeOut           List to store recorded clock-out times.
-     * @param dailyHours        List to store pre-computed daily work hours.
-     * @param parsedIn          List to store parsed clock-in times.
-     * @param parsedOut         List to store parsed clock-out times.
      * @throws                  FileNotFoundException if the CSV file is 
      *                          not found at the specified path.
      * ==============================================================
      */
-    static void loadDTR(String path, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, 
-                        ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<Double> dailyHours, ArrayList<LocalTime> parsedIn, ArrayList<LocalTime> parsedOut) {
+    static void loadDTR(EmployeeDTRData dtr, String path) {
         try {
             Scanner reader = new Scanner(new FileReader(path));
             if (reader.hasNextLine()) reader.nextLine(); // Skips the header row.
             while (reader.hasNextLine()) {
                 // Splits the CSV line into columns.
                 String[] column   = splitCSV(reader.nextLine());
-                dtrEmployeeNumber.add(column[0]);
-                dtrDate.add(column[3]);
-                timeIn.add(column[4]);
-                timeOut.add(column[5]);
-                dailyHours.add(0.0); 
-                parsedIn.add(null);  
-                parsedOut.add(null);
+                dtr.dtrEmployeeNumber.add(column[0]);
+                dtr.dtrDate.add(column[3]);
+                dtr.timeIn.add(column[4]);
+                dtr.timeOut.add(column[5]);
+                dtr.dailyHours.add(0.0); 
+                dtr.parsedIn.add(null);  
+                dtr.parsedOut.add(null);
             }
             reader.close();
         } catch (FileNotFoundException e) {
@@ -496,53 +433,49 @@ public class MotorPH {
     /**
      * ==============================================================
      * Computes daily hours worked for all employees in advance.
-     * This method pre-computes daily hours to avoid recalculation
-     * during payslip generation.
-     * 
+     *
+     * Important note: This method pre-computes daily hours to 
+     * avoid recalculating them whenever a payslip is generated.
      * Rules:
      * - Arrival at or before 8:10 AM is considered on time.
      * - Working hours are capped at 8 hours per day for those on time.
      * - No overtime is counted for hours worked past 5:00 PM.
      * - A 1-hour lunch break is deducted in the logic.
      *
-     * @param timeIn     List of recorded clock-in times.
-     * @param timeOut    List of recorded clock-out times.
-     * @param parsedIn   List of parsed clock-in times.
-     * @param parsedOut  List of parsed clock-out times.
-     * @param dailyHours List to store pre-computed daily work hours.
+     * @param dtr Employee daily time record (DTR) data.
      * ==============================================================
      */
-    static void computeDailyHours(ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<LocalTime> parsedIn, ArrayList<LocalTime> parsedOut, ArrayList<Double> dailyHours) {
+    static void computeDailyHours(EmployeeDTRData dtr) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("H:mm", Locale.ENGLISH);
         LocalTime graceEnd   = LocalTime.of(8, 10);
         LocalTime workStart  = LocalTime.of(8,  0);
         LocalTime workEnd    = LocalTime.of(17, 0);
 
-        for (int index = 0; index < timeIn.size(); index++) {
+        for (int index = 0; index < dtr.timeIn.size(); index++) {
             // Skip if time-in or time-out is missing.
-            if (timeIn.get(index) == null || timeOut.get(index) == null) continue;
+            if (dtr.timeIn.get(index) == null || dtr.timeOut.get(index) == null) continue;
 
             try {
                 // Parse time-in and time-out strings into LocalTime.
-                LocalTime login  = LocalTime.parse(timeIn.get(index).trim(),  format);
-                LocalTime logout = LocalTime.parse(timeOut.get(index).trim(), format);
+                LocalTime login  = LocalTime.parse(dtr.timeIn.get(index).trim(),  format);
+                LocalTime logout = LocalTime.parse(dtr.timeOut.get(index).trim(), format);
                 
-                parsedIn.set(index,  login);
-                parsedOut.set(index, logout);
+                dtr.parsedIn.set(index,  login);
+                dtr.parsedOut.set(index, logout);
                 
                 // Caps logout at 5:00 PM — no overtime counted.
                 if (logout.isAfter(workEnd)) logout = workEnd;
                 
                 LocalTime actualStart;
-                if (login.isBefore(workStart)) {           // If employees arrive before 8:00 AM, this sets login time as the actual time.
+                if (login.isBefore(workStart)) {           // If an employee arrived before 8:00 AM, sets login time as the actual time.
                     actualStart = login;
-                } else if (!login.isAfter(graceEnd)) {     // Applies 10-minute grace period (UP TO 8:10 AM). Employees logging in between 8:00–8:10 are treated as on-time.
+                } else if (!login.isAfter(graceEnd)) {     // If arrival time is between 8:00 and 8:10 AM, setting login time at 8:00 AM (grace period logic).
                     actualStart = workStart;              
-                } else {                                   // Logins after 8:10 are considered late and use actual login time.
+                } else {                                   // If employee's arrival time is after 8:10 AM, sets login time as the actual time.
                     actualStart = login;
                 }
                 
-                // Computes the total minutes worked; 1-hour lunch is then deducted in the next line (line 549).
+                // Computes minutes worked, then deducts 1-hour lunch.
                 long totalMinutes = Duration.between(actualStart, logout).toMinutes();
                 
                 // Deducts the 1-hour lunch ONLY if logged duration is more than 1 hour.
@@ -551,10 +484,10 @@ public class MotorPH {
                 double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
 
                 // Caps at "hoursWorked" hours long and saves.
-                dailyHours.set(index, Math.max(0.0, hoursWorked));
+                dtr.dailyHours.set(index, Math.max(0.0, hoursWorked));
                 
             } catch (Exception e) {
-                dailyHours.set(index, 0.0); // Sets hours to 0.0 if no hours are passed from the loadDTR method.
+                dtr.dailyHours.set(index, 0.0);
             }
         }
     }
@@ -562,7 +495,7 @@ public class MotorPH {
     /**
      * ==============================================================
      * Calculates total hours worked by an employee for a specific 
-     * month and cutoff period because payroll is processed twice a month.
+     * month and cutoff period.
      *
      * This is used to compute gross pay.
      *
@@ -571,36 +504,32 @@ public class MotorPH {
      * @param half              The cutoff period; must be either "first" (days 1-15) 
      *                          or "second" (days 16-end).
      * @param month             June to December, as an integer (6-12).
-     * @param timeIn            List of recorded clock-in times.
-     * @param timeOut           List of recorded clock-out times.
-     * @param dtrEmployeeNumber List of employee ID numbers from DTR.
-     * @param dtrDate           List of dates from DTR records.
-     * @param dailyHours        List of pre-computed daily work hours.
+     * @param dtr               Employee daily time record (DTR) data.
      * @return                  The total hours worked, capped at the maximum 
      *                          standard hours for the period.
      * ==============================================================
      */
-    static double getHours(String num, String half, int month, ArrayList<String> timeIn, ArrayList<String> timeOut, ArrayList<String> dtrEmployeeNumber, ArrayList<String> dtrDate, ArrayList<Double> dailyHours) {
+    static double getHours(String num, String half, int month, EmployeeDTRData dtr) {
         double total = 0;
-        for (int index = 0; index < timeIn.size(); index++) {
-            if (!num.equals(dtrEmployeeNumber.get(index))) continue;
-            if (dtrDate.get(index) == null) continue;
+        for (int index = 0; index < dtr.timeIn.size(); index++) {
+            if (!num.equals(dtr.dtrEmployeeNumber.get(index))) continue;
+            if (dtr.dtrDate.get(index) == null) continue;
             try {
-                String[] date = dtrDate.get(index).trim().split("/");
+                String[] date = dtr.dtrDate.get(index).trim().split(" ");
                 int currentMonth   = Integer.parseInt(date[0]);
                 int day = Integer.parseInt(date[1]);
                 if (currentMonth != month) continue;
                 // Add hours for the selected cutoff period.
-                if ("first".equals(half)  && day >= 1  && day <= 15) total += dailyHours.get(index);
-                if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(index);
+                if ("first".equals(half)  && day >= 1  && day <= 15) total += dtr.dailyHours.get(index);
+                if ("second".equals(half) && day >= 16 && day <= 31) total += dtr.dailyHours.get(index);
             } catch (Exception ignored) {}
         }
+        // Cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
-
-        // Based on Mon–Fri schedule: first cutoff = 10 workdays, second may be 11 in 31-day months.
-        // This ensures employees are only paid for official company workdays.
+        // First cutoff ALWAYS covers 10 working days.
+        // Second cutoff may include an extra workday in months with 31 days.
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
-        return Math.min(total, maxDays * 8.0); // Enforces 8-hr/workday company policy; excludes overtime from base payroll. 
+        return Math.min(total, maxDays * 8.0);
     }
 
     /**
@@ -748,7 +677,7 @@ public class MotorPH {
     // Custom CSV parser is used because some fields may contain commas inside quotes,
     // which would break a simple split(",") approach.
     static String[] splitCSV(String line) {
-        String[] columns = new String[19]; // Stores parsed CSV fields.
+        String[] columns = new String[19]; // Temporary buffer used when parsing CSV columns.
         boolean quoted = false; 
         StringBuilder buffer = new StringBuilder();
         int column = 0;
