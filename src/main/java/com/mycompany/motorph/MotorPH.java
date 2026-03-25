@@ -542,7 +542,7 @@ public class MotorPH {
                     actualStart = login;
                 }
                 
-                // Computes minutes worked, then deducts 1-hour lunch.
+                // Computes the total minutes worked; 1-hour lunch is then deducted in the next line (line 549).
                 long totalMinutes = Duration.between(actualStart, logout).toMinutes();
                 
                 // Deducts the 1-hour lunch ONLY if logged duration is more than 1 hour.
@@ -550,11 +550,11 @@ public class MotorPH {
                 
                 double hoursWorked = Math.min(totalMinutes / 60.0, 8.0);
 
-                // Caps at 8 hours and saves.
+                // Caps at "hoursWorked" hours long and saves.
                 dailyHours.set(index, Math.max(0.0, hoursWorked));
                 
             } catch (Exception e) {
-                dailyHours.set(index, 0.0);
+                dailyHours.set(index, 0.0); // Sets hours to 0.0 if no hours are passed from the loadDTR method.
             }
         }
     }
