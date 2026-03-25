@@ -269,13 +269,13 @@ public class MotorPH {
 
         String monthLabel   = monthLabel(month);
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
-        double cap = (lastDay == 31) ? 88.0 : 80.0; // 31-month days are given an 11-day work week (11 X 8 = 88 hours); otherwise, the cap is kept within a 10-day work week (10 X 8 = 80).
+        double cap = (lastDay == 31) ? 88.0 : 80.0; // Cutoff capped to official workdays; overtime not included (80–88 hrs depending on month).
 
         displayPayrollCalculations(monthLabel, lastDay, hrs1, gross1, net1, hrs2, cap, gross2, sss, philHealth, pagIbig, whTax, totalDed, net2);
     }
     /**
      * ==============================================================
-     * Method used to display the calculation results of processPayroll.
+     * This method is used to display the calculation results of processPayroll.
      * Results are displayed by month and cutoff period.
      * 
      * @param monthLabel The corresponding month of each calculation
@@ -293,7 +293,7 @@ public class MotorPH {
      * @param philHealth PhilHealth deduction for the employee.
      * @param pagIbig    Pag-IBIG deduction for the employee.
      * @param whTax      Employee's withholding tax.
-     * @param totalDed   Total gov't deductions.
+     * @param totalDed   Total government deductions.
      * @param net2       Net salary of the second cutoff.
      * ==============================================================
      */
@@ -595,14 +595,12 @@ public class MotorPH {
                 if ("second".equals(half) && day >= 16 && day <= 31) total += dailyHours.get(index);
             } catch (Exception ignored) {}
         }
-        // Cap to max working hours for the period.
         int lastDay = YearMonth.of(2024, month).lengthOfMonth();
-        
-        // First cutoff (days 1–15) assumes 10 workdays (Mon–Fri x 2 weeks).
-        // Second cutoff (days 16–end) may have 11 workdays if the month has 31 days,
-        // which means an extra weekday in longer months.
+
+        // Based on Mon–Fri schedule: first cutoff = 10 workdays, second may be 11 in 31-day months.
+        // This ensures employees are only paid for official company workdays.
         int maxDays = "first".equals(half) ? 10 : (lastDay == 31 ? 11 : 10);
-        return Math.min(total, maxDays * 8.0); // Caps total hours to avoid exceeding standard working hours (8 hours/day × number of working days in the cutoff period).
+        return Math.min(total, maxDays * 8.0); // Enforces 8-hr/workday company policy; excludes overtime from base payroll. 
     }
 
     /**
